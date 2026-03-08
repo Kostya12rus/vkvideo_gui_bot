@@ -215,7 +215,7 @@ class WebSocketClientApi:
                         threading.Thread(target=self._send_message, args=(message,), daemon=True).start()
 
     def __thread_check_message(self, message: dict):
-        # logger.debug(f"Message received: {message}")
+        logger.debug(f"Message received: {message}")
         if message == {}:
             self._send_message({})
             return
