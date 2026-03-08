@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, TypeVar, Optional
 from loguru import logger
 
 from .api_class import *
-from ..config import UPDATE_SUBSCRIPTIONS_LIST_INTERVAL, UPDATE_DROPS_LIST_INTERVAL
+from ..config import *
 from ..heartbeat import HeartbeatApi
 from ..heartbeat.wss_class import *
 
@@ -84,6 +84,53 @@ class WatchStreamMonitor:
         for streamer_nickname, streamer_id in self.sub_streamers:
             threading.Thread(target=self.stop_watch_streamer, args=(streamer_nickname, )).start()
         self.sub_streamers = []
+
+
+    def start_watch_online_subscribers(self: TVKVideoApi) -> None:
+        if self.is_watch_online_subscribers:
+            return
+        self.is_watch_online_subscribers = True
+        threading.Thread(target=self.__loop_watch_online_subscribers, daemon=True).start()
+
+    def __loop_watch_online_subscribers(self: TVKVideoApi):
+        while self.is_watch_online_subscribers:
+            try:
+                streamers = self.get_online_subscription_streamers()
+                now_list = set(self.sub_streamers.copy())
+                new_list = {
+                    (s.blog.blog_url, s.blog.owner.id)
+                    for s in streamers.data.stream_blogs
+                    if str(s.blog.blog_url) != str(s.blog.owner.id) and s.stream.is_online
+                }
+
+                add_list = set(new_list) - set(now_list)
+                for streamer_nickname, streamer_id in add_list:
+                    logger.info(
+                        f"{streamer_nickname}[{streamer_id}] добавляю стримера из подписок в онлайне, подключаю..."
+                    )
+                    self.sub_streamers.append((streamer_nickname, streamer_id))
+                    threading.Thread(target=self.start_watch_streamer, args=(streamer_nickname, )).start()
+
+                del_list = set(now_list) - set(new_list)
+                for streamer_nickname, streamer_id in del_list:
+                    logger.info(f"{streamer_nickname}[{streamer_id}] больше не онлайн в подписках, отключаю...")
+                    self.sub_streamers.remove((streamer_nickname, streamer_id))
+                    threading.Thread(target=self.stop_watch_streamer, args=(streamer_nickname, )).start()
+            except Exception:  # noqa
+                logger.exception("Watch online subscribers failed", exc_info=True)
+            finally:
+                time.sleep(UPDATE_ONLINE_SUBSCRIPTIONS_LIST_INTERVAL)
+
+    def stop_watch_online_subscribers(self: TVKVideoApi) -> None:
+        if not self.is_watch_online_subscribers:
+            return
+        self.is_watch_online_subscribers = False
+        if not self.sub_streamers:
+            return
+        for streamer_nickname, streamer_id in self.sub_streamers:
+            threading.Thread(target=self.stop_watch_streamer, args=(streamer_nickname, )).start()
+        self.sub_streamers = []
+
 
     def start_watch_drop_streamers(self: TVKVideoApi) -> None:
         if self.is_watch_drop_streamers:

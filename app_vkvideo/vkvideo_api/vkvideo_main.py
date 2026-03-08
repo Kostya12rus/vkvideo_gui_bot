@@ -32,6 +32,7 @@ class VKVideoApi(UserApi, StreamerApi, StreamersApi, WatchStreamMonitor):
         self.wss_api = WebSocketClientApi(self)
         self.heartbeat_streamers: dict[str, HeartbeatApi] = {}
 
+        self.is_watch_online_subscribers = False
         self.is_watch_all_subscribers = False
         self.sub_streamers: list[tuple[str, int]] = []
 

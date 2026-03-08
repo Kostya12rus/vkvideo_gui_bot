@@ -27,6 +27,29 @@ class StreamersApi(BaseApi):
                     break
             return return_data
 
+    def get_online_subscription_streamers(self, limit: int = 50, offset: int = 0, load_all: bool = False) -> VkapiOnlineSubscriptionStreamers:
+        if not load_all:
+            req = self.request(STREAMERS_ONLINE_SUBSCRIPTIONS_URL.format(limit, offset), "GET")
+            req_json = req.json()
+            req_class = VkapiOnlineSubscriptionStreamers(req_json)
+            self.callback.trigger(VKAPIEventName.ONLINE_SUBSCRIPTION_STREAMERS, user_id=self.user_id, message=req_class)
+            return req_class
+        else:
+            return_data = None
+            limit = limit
+            offset = 0
+            while True:
+                streamers = self.get_online_subscription_streamers(limit, offset)
+                offset += len(streamers.data.stream_blogs)
+                if not return_data:
+                    return_data = streamers
+                else:
+                    return_data.data.stream_blogs.extend(streamers.data.stream_blogs)
+
+                if streamers.extra.is_last:
+                    break
+            return return_data
+
     def get_drop_streamers(self, limit: int = 40, offset: int = 0, load_all: bool = False) -> VkapiDropStreamers:
         if not load_all:
             req = self.request(STREAMERS_DROP_URL.format(limit, offset), "GET")

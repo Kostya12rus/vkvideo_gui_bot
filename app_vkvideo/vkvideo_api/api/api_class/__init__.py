@@ -1,6 +1,7 @@
 from enum import Enum
 
 from .subscription_streamers import VkapiSubscriptionStreamers
+from .online_subscription_streamers import VkapiOnlineSubscriptionStreamers
 from .drop_streamers import VkapiDropStreamers
 from .streamer_info import VkapiStreamerInfo
 from .streamer_stream_info import VkapiStreamerStreamInfo
@@ -9,6 +10,7 @@ from .streamer_pending_bonus import VkapiStreamerPendingBonus
 
 class VKAPIEventName(Enum):
     SUBSCRIPTION_STREAMERS = "subscription_streamers"
+    ONLINE_SUBSCRIPTION_STREAMERS = "online_subscription_streamers"
     DROP_STREAMERS = "drop_streamers"
     STREAMER_INFO = "streamer_info"
     STREAMER_STREAM_INFO = "streamer_stream_info"
@@ -17,6 +19,7 @@ class VKAPIEventName(Enum):
 
 VKAPIEventClass = {
     VKAPIEventName.SUBSCRIPTION_STREAMERS: VkapiSubscriptionStreamers,
+    VKAPIEventName.ONLINE_SUBSCRIPTION_STREAMERS: VkapiOnlineSubscriptionStreamers,
     VKAPIEventName.DROP_STREAMERS: VkapiDropStreamers,
     VKAPIEventName.STREAMER_INFO: VkapiStreamerInfo,
     VKAPIEventName.STREAMER_STREAM_INFO: VkapiStreamerStreamInfo,
@@ -26,6 +29,7 @@ VKAPIEventClass = {
 __all__ = [
     "VKAPIEventName", "VKAPIEventClass",
     "VkapiSubscriptionStreamers",
+    "VkapiOnlineSubscriptionStreamers",
     "VkapiDropStreamers",
     "VkapiStreamerInfo",
     "VkapiStreamerStreamInfo",
