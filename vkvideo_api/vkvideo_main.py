@@ -12,13 +12,13 @@ class VKVideoApi(UserApi, StreamerApi, StreamersApi, WatchStreamMonitor):
     _new_lock = threading.Lock()
     _auth_lock = threading.Lock()
 
-    def __new__(cls, account_id: int, cookies: list[dict[str, Any]]) -> "VKVideoApi":
-        str_account_id = str(account_id)
+    def __new__(cls, user_id: int, cookies: list[dict[str, Any]]) -> "VKVideoApi":
+        str_user_id = str(user_id)
         with VKVideoApi._new_lock:
-            if str_account_id not in VKVideoApi._instance:
+            if str_user_id not in VKVideoApi._instance:
                 instance = super().__new__(cls)
-                VKVideoApi._instance[str_account_id] = instance
-            return VKVideoApi._instance[str_account_id]
+                VKVideoApi._instance[str_user_id] = instance
+            return VKVideoApi._instance[str_user_id]
 
     def __init__(self, user_id: int, cookies: list[dict[str, Any]]):
         super().__init__(user_id, cookies)
