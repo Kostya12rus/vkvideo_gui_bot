@@ -32,7 +32,6 @@ def run():
     new_user.wss_api.is_debug = False
     logger.info("Запускаю просмотр за стримерами на которые вы подписаны и сейчас онлайн")
     new_user.start_watch_online_subscribers()
-    # new_user.start_watch_all_subscribers()
     logger.info("Запускаю просмотр за стримерами у которые включена Бокс Компания")
     new_user.start_watch_drop_streamers()
 

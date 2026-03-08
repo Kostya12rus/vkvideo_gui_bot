@@ -49,6 +49,7 @@ class WatchStreamMonitor:
         while self.is_watch_all_subscribers:
             try:
                 streamers = self.get_subscription_streamers(load_all=True)
+                logger.info(f"Стримеров на которых подписан: {len(streamers.data)}")
                 now_list = set(self.sub_streamers.copy())
                 new_list = {
                     (s.blog.blog_url, s.blog.owner.id)
@@ -96,6 +97,7 @@ class WatchStreamMonitor:
         while self.is_watch_online_subscribers:
             try:
                 streamers = self.get_online_subscription_streamers()
+                logger.info(f"Стримеров онлайн: {len(streamers.data.stream_blogs)}")
                 now_list = set(self.sub_streamers.copy())
                 new_list = {
                     (s.blog.blog_url, s.blog.owner.id)
@@ -142,6 +144,7 @@ class WatchStreamMonitor:
         while self.is_watch_drop_streamers:
             try:
                 streamers = self.get_drop_streamers(load_all=True)
+                logger.info(f"Стримеров с Дроп Компанией: {len(streamers.data.stream_blogs)}")
                 now_list = set(self.drop_streamers.copy())
                 new_list = {
                     (s.blog.blog_url, s.blog.owner.id)

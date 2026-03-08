@@ -47,54 +47,52 @@ class WebSocketClientApi:
             return
         self.__is_run = is_run
 
-        self._initialize_callback()
-        if self.__is_run:
-            self._connect()
-        else:
-            self._close()
+        with self.__lock_connect:
+            self._initialize_callback()
+            if self.__is_run:
+                self._connect()
+            else:
+                self._close()
 
     def _connect(self) -> None:
-        with self.__lock_connect:
-            if self.__wss and self.__wss.connected:
-                return
+        if self.__wss and self.__wss.connected:
+            return
 
-            if not self.__wss_token:
-                logger.info(f"[{self.vk_api.user_id}]: Получаю токен пользователя для WSS соединения...")
-                user_data = self.vk_api.current_user_info()
-                self.__wss_token = user_data['webSocket']['token']
-                logger.info(f"[{self.vk_api.user_id}]: Токен WSS соединения получен '{self.__wss_token[:10]}...'")
+        if not self.__wss_token:
+            logger.info(f"[{self.vk_api.user_id}]: Получаю токен пользователя для WSS соединения...")
+            user_data = self.vk_api.current_user_info()
+            self.__wss_token = user_data['webSocket']['token']
+            logger.info(f"[{self.vk_api.user_id}]: Токен WSS соединения получен '{self.__wss_token[:10]}...'")
 
-            logger.info(f"[{self.vk_api.user_id}]: Подключаю WSS соединения к VKLive")
-            self.__wss = websocket.create_connection(
-                WSS_URL,
-                enable_multithread=True,
-                timeout=self.__wss_timeout,
-                origin=BASE_URL.rstrip("/")
-            )
-            logger.info(f"[{self.vk_api.user_id}]: Статус WSS соединения к VKLive: status={self.__wss.connected}")
+        logger.info(f"[{self.vk_api.user_id}]: Подключаю WSS соединения к VKLive")
+        self.__wss = websocket.create_connection(
+            WSS_URL,
+            enable_multithread=True,
+            timeout=self.__wss_timeout,
+            origin=BASE_URL.rstrip("/")
+        )
+        logger.info(f"[{self.vk_api.user_id}]: Статус WSS соединения к VKLive: status={self.__wss.connected}")
 
-            self.__thread_stop_event.clear()
-            self.__thread_read_message = threading.Thread(target=self._loop_read_message, daemon=True)
-            self.__thread_read_message.start()
+        self.__thread_stop_event.clear()
+        self.__thread_read_message = threading.Thread(target=self._loop_read_message, daemon=True)
+        self.__thread_read_message.start()
 
-            self.__send_token()
-            logger.info(f"[{self.vk_api.user_id}]: Авторизовался в WSS соединения к VKLive")
+        self.__send_token()
+        logger.info(f"[{self.vk_api.user_id}]: Авторизовался в WSS соединения к VKLive")
 
     def _close(self):
-        with self.__lock_connect:
-            if self.__wss:
-                if self.__wss.connected:
-                    logger.debug("Closing WebSocket...")
-                    self.__wss.close()
-                self.__wss = None
+        if self.__wss:
+            if self.__wss.connected:
+                logger.debug("Closing WebSocket...")
+                self.__wss.close()
+            self.__wss = None
 
-            self.__thread_stop_event.set()
-            if self.__thread_read_message and self.__thread_read_message.is_alive():
-                self.__thread_read_message.join(timeout=2.0)
+        self.__thread_stop_event.set()
+        if self.__thread_read_message and self.__thread_read_message.is_alive():
+            self.__thread_read_message.join(timeout=2.0)
 
-            self.__is_run = False
-            self.__wss_req_id = 0
-            self.streamer_subscribe = {}
+        self.__wss_req_id = 0
+        self.streamer_subscribe = {}
 
     def subscribe_streamer(self, streamer_nickname: str = None):
         if not streamer_nickname:
@@ -203,7 +201,7 @@ class WebSocketClientApi:
             if self.__is_run and not self.__wss.connected:
                 self.__wss_token = ""
                 if self.__thread_stop_event.wait(random.randint(1, 5) + random.random()):
-                    return 
+                    return
                 self._connect()
 
     def __thread_check_message(self, message: dict):
