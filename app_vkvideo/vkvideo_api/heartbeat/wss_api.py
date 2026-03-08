@@ -102,58 +102,62 @@ class WebSocketClientApi:
         self.is_run = True
 
         with self.__lock_connect:
-            clear_streamer_nickname = str(streamer_nickname).lower()
-            if clear_streamer_nickname not in self.streamer_subscribe:
-                self.streamer_subscribe[clear_streamer_nickname] = set()
+            pass
 
-            streamer_wss_channels = self.streamer_subscribe.get(clear_streamer_nickname, set())
-            if not streamer_wss_channels:
-                heartbeat_class = self.vk_api.get_heartbeat_class(streamer_nickname=streamer_nickname)
-                if heartbeat_class and heartbeat_class._last_streamer_stream_info:
-                    streamer_wss_channels = self.__generate_wss_channel_from_data(heartbeat_class._last_streamer_stream_info)
-                    if streamer_wss_channels:
-                        self.streamer_subscribe[streamer_nickname] = streamer_wss_channels
-            if not streamer_wss_channels:
-                return
+        clear_streamer_nickname = str(streamer_nickname).lower()
+        if clear_streamer_nickname not in self.streamer_subscribe:
+            self.streamer_subscribe[clear_streamer_nickname] = set()
 
-            messages = [{"subscribe": {"channel": c}, "id": self.__get_wss_req_id()} for c in streamer_wss_channels]
-            message = "\n".join([json.dumps(m) for m in messages])
-            self._send_message(message)
-            self.streamers_inited[clear_streamer_nickname] = message
+        streamer_wss_channels = self.streamer_subscribe.get(clear_streamer_nickname, set())
+        if not streamer_wss_channels:
+            heartbeat_class = self.vk_api.get_heartbeat_class(streamer_nickname=streamer_nickname)
+            if heartbeat_class and heartbeat_class._last_streamer_stream_info:
+                streamer_wss_channels = self.__generate_wss_channel_from_data(heartbeat_class._last_streamer_stream_info)
+                if streamer_wss_channels:
+                    self.streamer_subscribe[streamer_nickname] = streamer_wss_channels
+        if not streamer_wss_channels:
+            return
 
-            logger.info(
-                f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
-                f"Подписался на {len(streamer_wss_channels)} событий стримера"
-            )
+        messages = [{"subscribe": {"channel": c}, "id": self.__get_wss_req_id()} for c in streamer_wss_channels]
+        message = "\n".join([json.dumps(m) for m in messages])
+        self._send_message(message)
+        self.streamers_inited[clear_streamer_nickname] = message
+
+        logger.info(
+            f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
+            f"Подписался на {len(streamer_wss_channels)} событий стримера"
+        )
 
     def unsubscribe_streamer(self, streamer_nickname: str = None):
         if not not self.__is_run or not streamer_nickname:
             return
 
         with self.__lock_connect:
-            clear_streamer_nickname = str(streamer_nickname).lower()
-            if clear_streamer_nickname not in self.streamer_subscribe:
-                return
+            pass
 
-            streamer_wss_channels = self.streamer_subscribe.get(clear_streamer_nickname, set())
-            if not streamer_wss_channels:
-                heartbeat_class = self.vk_api.get_heartbeat_class(streamer_nickname=streamer_nickname)
-                if heartbeat_class and heartbeat_class._last_streamer_stream_info:
-                    streamer_wss_channels = self.__generate_wss_channel_from_data(heartbeat_class._last_streamer_stream_info)
-                    if streamer_wss_channels:
-                        self.streamer_subscribe[streamer_nickname] = streamer_wss_channels
+        clear_streamer_nickname = str(streamer_nickname).lower()
+        if clear_streamer_nickname not in self.streamer_subscribe:
+            return
 
-            messages = [{"unsubscribe": {"channel": c}, "id": self.__get_wss_req_id()} for c in streamer_wss_channels]
-            message = "\n".join([json.dumps(m) for m in messages])
-            self._send_message(message)
-            if clear_streamer_nickname in self.streamers_inited:
-                del self.streamers_inited[clear_streamer_nickname]
+        streamer_wss_channels = self.streamer_subscribe.get(clear_streamer_nickname, set())
+        if not streamer_wss_channels:
+            heartbeat_class = self.vk_api.get_heartbeat_class(streamer_nickname=streamer_nickname)
+            if heartbeat_class and heartbeat_class._last_streamer_stream_info:
+                streamer_wss_channels = self.__generate_wss_channel_from_data(heartbeat_class._last_streamer_stream_info)
+                if streamer_wss_channels:
+                    self.streamer_subscribe[streamer_nickname] = streamer_wss_channels
 
-            logger.info(
-                f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
-                f"Отписался от {len(streamer_wss_channels)} событий стримера"
-            )
-            del self.streamer_subscribe[clear_streamer_nickname]
+        messages = [{"unsubscribe": {"channel": c}, "id": self.__get_wss_req_id()} for c in streamer_wss_channels]
+        message = "\n".join([json.dumps(m) for m in messages])
+        self._send_message(message)
+        if clear_streamer_nickname in self.streamers_inited:
+            del self.streamers_inited[clear_streamer_nickname]
+
+        logger.info(
+            f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
+            f"Отписался от {len(streamer_wss_channels)} событий стримера"
+        )
+        del self.streamer_subscribe[clear_streamer_nickname]
 
     def _send_message(self, message: dict | list | str):
         if isinstance(message, (dict, list)):
@@ -221,6 +225,7 @@ class WebSocketClientApi:
         if "connect" in message_str and "client" in message_str and "version" in message_str and "expires" in message_str:
             logger.info(f"[{self.vk_api.user_id}]: Успешное соединение с WSS: {message=}")
         # logger.debug(f"Message received: {message}")
+
         if message == {}:
             self._send_message({})
             return
