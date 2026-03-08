@@ -9,7 +9,7 @@ from loguru import logger
 import curl_cffi
 from curl_cffi.requests.session import HttpMethod
 
-from utils import CallbackManager
+from app.utils import CallbackManager
 from ..config import *
 
 

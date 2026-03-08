@@ -11,6 +11,7 @@ from websocket import WebSocket
 from .wss_class import *
 from ..api.api_class import *
 from ..config import WSS_URL, WSS_TYPE_MESSAGE_RE, BASE_URL
+from app.config import Config as MainConfig
 
 if TYPE_CHECKING:
     from ..vkvideo_main import VKVideoApi
@@ -258,7 +259,7 @@ class WebSocketClientApi:
         if not self.is_debug:
             return
 
-        path_save = pathlib.Path("data") / "wss_message"
+        path_save = MainConfig.DATA_PATH / "wss_message"
         path_save.mkdir(parents=True, exist_ok=True)
 
         file_name, _, _ = self.__get_message_type_info(message)
