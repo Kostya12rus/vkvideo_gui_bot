@@ -32,6 +32,7 @@ class WebSocketClientApi:
 
         self.__is_run: bool = False
         self.__lock_connect = threading.Lock()
+        self.__lock_debug_message = threading.Lock()
         self.__thread_read_message: Optional[threading.Thread] = None
         self.__thread_stop_event = threading.Event()
 
@@ -113,8 +114,9 @@ class WebSocketClientApi:
         if not streamer_wss_channels:
             return
 
-        for channel in streamer_wss_channels:
-            self._send_message({"subscribe": {"channel": channel}, "id": self.__get_wss_req_id()})
+        messages = [{"subscribe": {"channel": c}, "id": self.__get_wss_req_id()} for c in streamer_wss_channels]
+        self._send_message("\n".join([json.dumps(m) for m in messages]))
+
         logger.info(
             f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
             f"Подписался на {len(streamer_wss_channels)} событий стримера"
@@ -136,8 +138,9 @@ class WebSocketClientApi:
                 if streamer_wss_channels:
                     self.streamer_subscribe[streamer_nickname] = streamer_wss_channels
 
-        for channel in streamer_wss_channels:
-            self._send_message({"unsubscribe": {"channel": channel}, "id": self.__get_wss_req_id()})
+        messages = [{"unsubscribe": {"channel": c}, "id": self.__get_wss_req_id()} for c in streamer_wss_channels]
+        self._send_message("\n".join([json.dumps(m) for m in messages]))
+
         logger.info(
             f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
             f"Отписался от {len(streamer_wss_channels)} событий стримера"
@@ -151,11 +154,20 @@ class WebSocketClientApi:
             pass
         else:
             return
+        if message == "{}":
+            self.__wss.send(message)
+            # logger.debug(f"Message send: {message}")
+            return
+        elif "connect" in message and "token" in message:
+            self.__wss.send(message)
+            # logger.debug(f"Message send: TOKEN SECRIT")
+            return
+
         with self.__lock_connect:
             if not self.__wss.connected:
                 return
             self.__wss.send(message)
-            # logger.debug(f"Message send: {data}")
+            # logger.debug(f"Message send: {message}")
 
     def _loop_read_message(self):
         """Основной цикл чтения сообщений."""
@@ -174,14 +186,9 @@ class WebSocketClientApi:
 
                     try:
                         for obj in self.__decode_json_stream(message):
-                            if obj == {}:
-                                self._send_message({})
-                                continue
-
-                            self.__send_callback(obj)
-                            # logger.debug(f"Message received: {obj}")
+                            threading.Thread(target=self.__thread_check_message, args=(obj,), daemon=True).start()
                     except:  # noqa
-                        logger.exception(f"Пришло нестандартное сообщение {message=}")
+                        logger.error(f"Пришло нестандартное сообщение {message=}")
 
                 except websocket.WebSocketTimeoutException:
                     continue
@@ -195,16 +202,22 @@ class WebSocketClientApi:
             if self.__is_run and not self.__wss.connected:
                 self._connect()
 
+    def __thread_check_message(self, message: dict):
+        # logger.debug(f"Message received: {message}")
+        if message == {}:
+            self._send_message({})
+            return
+
+        self.__send_callback(message)
+
     def __send_token(self):
-        self.__wss.send(json.dumps(
-            {
-                "connect": {
-                    "name": "js",
-                    "token": self.__wss_token,
-                },
-                "id": self.__get_wss_req_id()
-            }
-        ))
+        self._send_message({
+            "connect": {
+                "name": "js",
+                "token": self.__wss_token,
+            },
+            "id": self.__get_wss_req_id()
+        })
 
     def __get_wss_req_id(self) -> int:
         self.__wss_req_id += 1
@@ -265,43 +278,44 @@ class WebSocketClientApi:
         if not self.is_debug:
             return
 
-        path_save = MainConfig.DATA_PATH / "wss_message"
-        path_save.mkdir(parents=True, exist_ok=True)
+        with self.__lock_debug_message:
+            path_save = MainConfig.DATA_PATH / "wss_message"
+            path_save.mkdir(parents=True, exist_ok=True)
 
-        file_name, _, _ = self.__get_message_type_info(message)
-        if not file_name:
-            return
+            file_name, _, _ = self.__get_message_type_info(message)
+            if not file_name:
+                return
 
-        file_path = path_save / f"{file_name}.json"
-        saved_data = []
-        if file_path.is_file():
-            try:
-                content = file_path.read_text(encoding="utf-8")
-                saved_data = json.loads(content)
-                if not isinstance(saved_data, list):
+            file_path = path_save / f"{file_name}.json"
+            saved_data = []
+            if file_path.is_file():
+                try:
+                    content = file_path.read_text(encoding="utf-8")
+                    saved_data = json.loads(content)
+                    if not isinstance(saved_data, list):
+                        saved_data = []
+                except (json.JSONDecodeError, OSError):
                     saved_data = []
-            except (json.JSONDecodeError, OSError):
-                saved_data = []
 
-        saved_data.append(message)
-        if len(saved_data) > 100:
-            saved_data = saved_data[-100:]
+            saved_data.append(message)
+            if len(saved_data) > 100:
+                saved_data = saved_data[-100:]
 
-        temp_path = file_path.with_suffix('.tmp')
+            temp_path = file_path.with_suffix('.tmp')
 
-        try:
-            temp_path.write_text(
-                json.dumps(saved_data, ensure_ascii=False, indent=2),
-                encoding="utf-8"
-            )
-            temp_path.replace(file_path)
-        except OSError:
-            file_path.write_text(
-                json.dumps(saved_data, ensure_ascii=False, indent=2),
-                encoding="utf-8"
-            )
-            if temp_path.exists():
-                temp_path.unlink()
+            try:
+                temp_path.write_text(
+                    json.dumps(saved_data, ensure_ascii=False, indent=2),
+                    encoding="utf-8"
+                )
+                temp_path.replace(file_path)
+            except OSError:
+                file_path.write_text(
+                    json.dumps(saved_data, ensure_ascii=False, indent=2),
+                    encoding="utf-8"
+                )
+                if temp_path.exists():
+                    temp_path.unlink()
 
     def _initialize_callback(self) -> None:
         if hasattr(self, "__init_callback"):
