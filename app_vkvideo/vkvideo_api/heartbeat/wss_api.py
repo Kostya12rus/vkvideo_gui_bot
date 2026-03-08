@@ -1,4 +1,5 @@
 import json
+import random
 import re
 import threading
 from typing import TYPE_CHECKING, Optional, Tuple
@@ -200,6 +201,9 @@ class WebSocketClientApi:
                     break
         finally:
             if self.__is_run and not self.__wss.connected:
+                self.__wss_token = ""
+                if self.__thread_stop_event.wait(random.randint(1, 5) + random.random()):
+                    return 
                 self._connect()
 
     def __thread_check_message(self, message: dict):
