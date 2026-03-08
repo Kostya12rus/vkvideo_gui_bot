@@ -69,7 +69,6 @@ class WebSocketClientApi:
         self.__wss = websocket.create_connection(
             WSS_URL,
             enable_multithread=True,
-            timeout=self.__wss_timeout,
             origin=BASE_URL.rstrip("/")
         )
         logger.info(f"[{self.vk_api.user_id}]: Статус WSS соединения к VKLive: status={self.__wss.connected}")
@@ -182,9 +181,6 @@ class WebSocketClientApi:
             # logger.debug(f"Message send: {message}")
 
     def _loop_read_message(self):
-        """Основной цикл чтения сообщений."""
-        self.__wss.timeout = self.__wss_timeout
-
         try:
             while self.__wss.connected:
                 try:
