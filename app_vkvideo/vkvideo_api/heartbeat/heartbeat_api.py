@@ -1,6 +1,5 @@
 import random
 import threading
-import time
 import uuid
 from typing import TYPE_CHECKING, Optional
 
@@ -166,7 +165,6 @@ class HeartbeatApi:
         if is_run is not None:
             self.is_run = is_run
 
-
     def _initialize_callback(self) -> None:
         if hasattr(self, "__init_callback"):
             return
@@ -201,7 +199,6 @@ class HeartbeatApi:
 
         if self.streamer_stream_id:
             self._last_streamer_stream_info = message
-
 
     def __channel_stream_channel_info(self, streamer_id: int, user_id: int, message: WssChannelStreamChannelInfo):
         if not user_id or str(user_id) != str(self.user_id):

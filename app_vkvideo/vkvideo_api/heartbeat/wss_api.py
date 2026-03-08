@@ -1,5 +1,4 @@
 import json
-import pathlib
 import re
 import threading
 from typing import TYPE_CHECKING, Optional, Tuple
@@ -8,10 +7,10 @@ import websocket
 from loguru import logger
 from websocket import WebSocket
 
+from app_vkvideo.config import Config as MainConfig
 from .wss_class import *
 from ..api.api_class import *
 from ..config import WSS_URL, WSS_TYPE_MESSAGE_RE, BASE_URL
-from app.config import Config as MainConfig
 
 if TYPE_CHECKING:
     from ..vkvideo_main import VKVideoApi
