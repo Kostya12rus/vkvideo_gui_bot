@@ -5,6 +5,6 @@ cd /d "%~dp0"
 python -m venv .venv
 call ".venv\Scripts\activate.bat"
 
-steam_work_example
+vkvideo_gui_bot_console
 
 pause

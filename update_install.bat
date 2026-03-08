@@ -6,7 +6,6 @@ python -m venv .venv
 call ".venv\Scripts\activate.bat"
 
 python -m pip install --upgrade pip setuptools wheel
-
 pip install --force-reinstall git+https://github.com/Kostya12rus/vkvideo_gui_bot.git
 
 pause
