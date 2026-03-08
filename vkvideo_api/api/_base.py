@@ -32,8 +32,8 @@ class RequestParams(TypedDict, total=False):
 class BaseApi:
     callback = CallbackManager()
 
-    def __init__(self, account_id: int, cookies: list[dict[str, Any]]):
-        self.account_id = account_id
+    def __init__(self, user_id: int, cookies: list[dict[str, Any]]):
+        self.user_id = user_id
         self._cookies_list = cookies.copy()
         self.session = self._create_session()
         self.__request_semaphore = threading.Semaphore(MAX_REQUEST_IN_TIME)

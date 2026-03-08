@@ -8,7 +8,8 @@ import websocket
 from loguru import logger
 from websocket import WebSocket
 
-from .wss_class import WSSEventClass, WSSEventName
+from .wss_class import *
+from ..api.api_class import *
 from ..config import WSS_URL, WSS_TYPE_MESSAGE_RE, BASE_URL
 
 if TYPE_CHECKING:
@@ -21,110 +22,182 @@ class WebSocketClientApi:
 
     def __init__(self, vk_api: "VKVideoApi"):
         self.vk_api = vk_api
+        self.streamer_subscribe: dict[str, set] = {}
+
+        self.__callback = self.vk_api.callback
+
         self.__wss: Optional[WebSocket] = None
         self.__wss_token: Optional[str] = None
-        self.__wss_req_id = 1
+        self.__wss_req_id = 0
         self.__wss_timeout = 30
-        self.__is_run = False
 
-        self._read_thread: Optional[threading.Thread] = None
-        self.__streamer_subscribe = {}
-        self.__callback = self.vk_api.callback
-        self.streamers: dict[str, int]= {}
+        self.__is_run: bool = False
+        self.__thread_read_message: Optional[threading.Thread] = None
+        self.__thread_stop_event = threading.Event()
 
-    def connect(self) -> None:
+    @property
+    def is_run(self) -> bool:
+        return self.__is_run
+
+    @is_run.setter
+    def is_run(self, is_run: bool) -> None:
+        if not isinstance(is_run, bool) or self.__is_run == is_run:
+            return
+        self.__is_run = is_run
+
         with self._run_lock:
+            self._initialize_callback()
             if self.__is_run:
-                return
-            if not self.__wss_token:
-                user_data = self.vk_api.current_user_info()
-                self.__wss_token = user_data['webSocket']['token']
+                self._connect()
+            else:
+                self._close()
 
-            self.__wss = websocket.create_connection(
-                WSS_URL,
-                enable_multithread=True,
-                timeout=self.__wss_timeout,
-                origin=BASE_URL.rstrip("/")
-            )
-            self._read_thread = threading.Thread(target=self._read_loop, daemon=True)
-            self._read_thread.start()
-            self.__send_token()
-            self.__is_run = True
-
-    def close(self):
-        """Корректное закрытие соединения."""
-        if self._read_thread and self._read_thread.is_alive():
-            self._read_thread.join(timeout=2.0)
-
-        if not self.__wss:
+    def _connect(self) -> None:
+        if self.__wss and self.__wss.connected:
             return
-        logger.debug("Closing WebSocket...")
-        self.__wss.close()
-        self.__wss = None
+
+        if not self.__wss_token:
+            logger.info(f"[{self.vk_api.user_id}]: Получаю токен пользователя для WSS соединения...")
+            user_data = self.vk_api.current_user_info()
+            self.__wss_token = user_data['webSocket']['token']
+            logger.info(f"[{self.vk_api.user_id}]: Токен WSS соединения получен '{self.__wss_token[:10]}...'")
+
+        logger.info(f"[{self.vk_api.user_id}]: Подключаю WSS соединения к VKLive")
+        self.__wss = websocket.create_connection(
+            WSS_URL,
+            enable_multithread=True,
+            timeout=self.__wss_timeout,
+            origin=BASE_URL.rstrip("/")
+        )
+        logger.info(f"[{self.vk_api.user_id}]: Статус WSS соединения к VKLive: status={self.__wss.connected}")
+
+        self.__thread_stop_event.clear()
+        self.__thread_read_message = threading.Thread(target=self._loop_read_message, daemon=True)
+        self.__thread_read_message.start()
+
+        self.__send_token()
+
+    def _close(self):
+        if self.__wss:
+            if self.__wss.connected:
+                logger.debug("Closing WebSocket...")
+                self.__wss.close()
+            self.__wss = None
+
+        self.__thread_stop_event.set()
+        if self.__thread_read_message and self.__thread_read_message.is_alive():
+            self.__thread_read_message.join(timeout=2.0)
+
         self.__is_run = False
+        self.__wss_req_id = 0
+        self.streamer_subscribe = {}
 
-    def subscribe_streamer(self, streamer_nickname: str = None, streamer_id: int = None):
-        if not streamer_id and not streamer_nickname:
+    def subscribe_streamer(self, streamer_nickname: str = None):
+        if not streamer_nickname:
+            return
+        self.is_run = True
+
+        clear_streamer_nickname = str(streamer_nickname).lower()
+        if clear_streamer_nickname not in self.streamer_subscribe:
+            self.streamer_subscribe[clear_streamer_nickname] = set()
+
+        streamer_wss_channels = self.streamer_subscribe.get(clear_streamer_nickname, set())
+        if not streamer_wss_channels:
+            heartbeat_class = self.vk_api.get_heartbeat_class(streamer_nickname=streamer_nickname)
+            if heartbeat_class and heartbeat_class._last_streamer_stream_info:
+                streamer_wss_channels = self.__generate_wss_channel_from_data(heartbeat_class._last_streamer_stream_info)
+                if streamer_wss_channels:
+                    self.streamer_subscribe[streamer_nickname] = streamer_wss_channels
+        if not streamer_wss_channels:
             return
 
-        if not self.__is_run:
-            self.connect()
+        logger.info(
+            f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
+            f"Подписываюсь на {len(streamer_wss_channels)} событий стримера"
+        )
+        for channel in streamer_wss_channels:
+            self._send_message({"subscribe": {"channel": channel}, "id": self.__get_wss_req_id()})
 
-        if not streamer_id:
-            streamer_info = self.vk_api.get_streamer_info(streamer_nickname)
-            streamer_id = streamer_info.owner.id
-        self.streamers[streamer_nickname.lower()] = streamer_id
-
-        if str(streamer_id) in self.__streamer_subscribe:
+    def unsubscribe_streamer(self, streamer_nickname: str = None):
+        if not not self.__is_run or not streamer_nickname:
             return
 
-        stream_info = self.vk_api.get_streamer_stream_info(streamer_nickname)
-        if not stream_info.data.stream:
-            return
-        all_ws_channels = {
-            value
-            for key, value in stream_info.data.stream._data_json.items()
-            if isinstance(value, str) and key.startswith("ws") and str(streamer_id) in value
-        }
-
-        for channel in all_ws_channels:
-            self.send({"subscribe": {"channel": channel}, "id": self.__get_wss_req_id()})
-        self.__streamer_subscribe[str(streamer_id)] = all_ws_channels
-
-    def unsubscribe_streamer(self, streamer_nickname: str = None, streamer_id: int = None):
-        if not streamer_id and not streamer_nickname:
+        clear_streamer_nickname = str(streamer_nickname).lower()
+        if clear_streamer_nickname not in self.streamer_subscribe:
             return
 
-        if not self.__is_run:
+        streamer_wss_channels = self.streamer_subscribe.get(clear_streamer_nickname, set())
+        if not streamer_wss_channels:
+            heartbeat_class = self.vk_api.get_heartbeat_class(streamer_nickname=streamer_nickname)
+            if heartbeat_class and heartbeat_class._last_streamer_stream_info:
+                streamer_wss_channels = self.__generate_wss_channel_from_data(heartbeat_class._last_streamer_stream_info)
+                if streamer_wss_channels:
+                    self.streamer_subscribe[streamer_nickname] = streamer_wss_channels
+
+        logger.info(
+            f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
+            f"Отписываюсь от {len(streamer_wss_channels)} событий стримера"
+        )
+        for channel in streamer_wss_channels:
+            self._send_message({"unsubscribe": {"channel": channel}, "id": self.__get_wss_req_id()})
+        del self.streamer_subscribe[clear_streamer_nickname]
+
+    def _send_message(self, message: dict | list | str):
+        if isinstance(message, (dict, list)):
+            message = json.dumps(message)
+        elif isinstance(message, str):
+            pass
+        else:
             return
-
-        if not streamer_id:
-            streamer_info = self.vk_api.get_streamer_info(streamer_nickname)
-            streamer_id = streamer_info.owner.id
-
-        if str(streamer_id) not in self.__streamer_subscribe:
-            return
-
-        for channel in self.__streamer_subscribe[str(streamer_id)]:
-            self.send({"unsubscribe": {"channel": channel}, "id": self.__get_wss_req_id()})
-        del self.__streamer_subscribe[str(streamer_id)]
-
-    def send(self, data: dict):
-        if isinstance(data, (dict, list)):
-            data = json.dumps(data)
-        self.__wss.send(data)
+        self.__wss.send(message)
         # logger.debug(f"Message send: {data}")
 
+    def _loop_read_message(self):
+        """Основной цикл чтения сообщений."""
+        self.__wss.timeout = self.__wss_timeout
+
+        try:
+            while self.__wss.connected:
+                try:
+                    if self.__thread_stop_event.is_set():
+                        break
+
+                    message = self.__wss.recv()
+                    if message is None:
+                        logger.debug("Server closed connection.")
+                        break
+
+                    try:
+                        for obj in self.__decode_json_stream(message):
+                            if obj == {}:
+                                self._send_message({})
+                                continue
+
+                            self.__send_callback(obj)
+                            # logger.debug(f"Message received: {obj}")
+                    except:  # noqa
+                        logger.exception(f"Пришло нестандартное сообщение {message=}")
+
+                except websocket.WebSocketTimeoutException:
+                    continue
+                except websocket.WebSocketConnectionClosedException:
+                    logger.error("WSS Connection closed unexpectedly.", exc_info=True)
+                    break
+                except Exception:  # noqa
+                    logger.error(f"WSS Connection closed error receiving message.", exc_info=True)
+                    break
+
+        finally:
+            self.is_run = False
+
     def __send_token(self):
-        self.send(
-            {
-                "connect": {
-                    "name": "js",
-                    "token": self.__wss_token,
-                },
-                "id": self.__get_wss_req_id()
-            }
-        )
+        self._send_message({
+            "connect": {
+                "name": "js",
+                "token": self.__wss_token,
+            },
+            "id": self.__get_wss_req_id()
+        })
 
     def __get_wss_req_id(self) -> int:
         self.__wss_req_id += 1
@@ -141,41 +214,6 @@ class WebSocketClientApi:
             while _idx < len(stream) and stream[_idx] in '\n ':
                 _idx += 1
 
-    def _read_loop(self):
-        """Основной цикл чтения сообщений."""
-        self.__wss.timeout = self.__wss_timeout
-
-        try:
-            while self.__wss.connected:
-                try:
-                    message = self.__wss.recv()
-                    if message is None:
-                        logger.debug("Server closed connection.")
-                        break
-
-                    try:
-                        for obj in self.__decode_json_stream(message):
-                            if obj == {}:
-                                self.send({})
-                                continue
-
-                            self.__send_callback(obj)
-                            # logger.debug(f"Message received: {obj}")
-                    except:  # noqa
-                        logger.exception(f"Пришло нестандартное сообщение {message=}")
-
-                except websocket.WebSocketTimeoutException:
-                    continue
-                except websocket.WebSocketConnectionClosedException:
-                    logger.warning("Connection closed unexpectedly.")
-                    break
-                except Exception as e:
-                    logger.error(f"Error receiving message: {e}")
-                    break
-
-        finally:
-            self.close()
-
     def __send_callback(self, message: dict):
         channel_type, streamer_id, user_id = self.__get_message_type_info(message)
         if not channel_type or not streamer_id:
@@ -188,9 +226,9 @@ class WebSocketClientApi:
                 self.__callback.trigger(
                     event, streamer_id=streamer_id, user_id=user_id, message=_class(message)
                 )
-                return
+                break
 
-        self.debug_save_message(message)
+        self.__debug_save_message(message)
 
     @staticmethod
     def __get_message_type_info(message: dict) -> Tuple[Optional[str], Optional[int], Optional[int]]:
@@ -216,7 +254,7 @@ class WebSocketClientApi:
         clear_channel_type = re.sub(r"_+", "_", _normalize_text).strip("_").lower()
         return clear_channel_type, streamer_id_int, user_id_int
 
-    def debug_save_message(self, message: dict) -> None:
+    def __debug_save_message(self, message: dict) -> None:
         if not self.is_debug:
             return
 
@@ -257,3 +295,31 @@ class WebSocketClientApi:
             )
             if temp_path.exists():
                 temp_path.unlink()
+
+    def _initialize_callback(self) -> None:
+        if hasattr(self, "__init_callback"):
+            return
+        self.__init_callback = True
+        self.vk_api.callback.register(VKAPIEventName.STREAMER_STREAM_INFO, self.__on_streamer_stream_info)
+
+    def __on_streamer_stream_info(self, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo):
+        streamer_nickname = message.data.stream.embed_url.split("/")[-1]
+        clear_streamer_nickname = str(streamer_nickname).lower()
+        if clear_streamer_nickname not in self.streamer_subscribe:
+            return
+
+        all_ws_channels = self.__generate_wss_channel_from_data(message)
+        if all_ws_channels:
+            self.streamer_subscribe[clear_streamer_nickname] = all_ws_channels
+            self.subscribe_streamer(streamer_nickname)
+
+    @staticmethod
+    def __generate_wss_channel_from_data(data: VkapiStreamerStreamInfo) -> set:
+        if not data:
+            return set()
+        str_streamer_id = str(data.data.stream.user.id)
+        return {
+            value
+            for key, value in data.data.stream._data_json.items()
+            if isinstance(value, str) and key.startswith("ws") and str_streamer_id in value
+        }

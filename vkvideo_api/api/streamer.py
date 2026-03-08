@@ -22,7 +22,7 @@ class StreamerApi(BaseApi):
         req_class = VkapiStreamerInfo(req_json)
         self.callback.trigger(
             VKAPIEventName.STREAMER_INFO, streamer_id=req_class.owner.id,
-            user_id=self.account_id, message=req_class
+            user_id=self.user_id, message=req_class
         )
         return req_class
 
@@ -36,7 +36,7 @@ class StreamerApi(BaseApi):
         req_class = VkapiStreamerStreamInfo(req_json)
         self.callback.trigger(
             VKAPIEventName.STREAMER_STREAM_INFO, streamer_id=req_class.data.stream.user.id,
-            user_id=self.account_id, message=req_class
+            user_id=self.user_id, message=req_class
         )
         return req_class
 
@@ -118,7 +118,7 @@ class StreamerApi(BaseApi):
         req_class = VkapiStreamerPendingBonus(req_json)
         self.callback.trigger(
             VKAPIEventName.STREAMER_PENDING_BONUS, streamer_id=_streamer_id,
-            user_id=self.account_id, message=req_class
+            user_id=self.user_id, message=req_class
         )
         return req_class
 

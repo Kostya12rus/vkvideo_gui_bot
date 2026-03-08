@@ -20,8 +20,8 @@ class VKVideoApi(UserApi, StreamerApi, StreamersApi, WatchStreamMonitor):
                 VKVideoApi._instance[str_account_id] = instance
             return VKVideoApi._instance[str_account_id]
 
-    def __init__(self, account_id: int, cookies: list[dict[str, Any]]):
-        super().__init__(account_id, cookies)
+    def __init__(self, user_id: int, cookies: list[dict[str, Any]]):
+        super().__init__(user_id, cookies)
         if hasattr(self, '_initialized'):
             self.cookies = cookies
             return
@@ -30,7 +30,7 @@ class VKVideoApi(UserApi, StreamerApi, StreamersApi, WatchStreamMonitor):
         self.__is_running = False
 
         self.wss_api = WebSocketClientApi(self)
-        self.streamers: dict[str, HeartbeatApi] = {}
+        self.heartbeat_streamers: dict[str, HeartbeatApi] = {}
 
         self.is_watch_all_subscribers = False
         self.sub_streamers: list[tuple[str, int]] = []
@@ -52,6 +52,6 @@ class VKVideoApi(UserApi, StreamerApi, StreamersApi, WatchStreamMonitor):
     @staticmethod
     def __get_vkvideo_api_from_cookie(cookies: list[dict[str, Any]]) -> "VKVideoApi":
         instance = object.__new__(VKVideoApi)
-        instance.__init__(account_id=-1, cookies=cookies)
+        instance.__init__(user_id=-1, cookies=cookies)
         user_info = instance.current_user_info()
-        return VKVideoApi(account_id=user_info['id'], cookies=cookies)
+        return VKVideoApi(user_id=user_info['id'], cookies=cookies)

@@ -9,7 +9,7 @@ class StreamersApi(BaseApi):
             req = self.request(STREAMERS_SUBSCRIPTIONS_URL.format(limit, offset), "GET")
             req_json = req.json()
             req_class = VkapiSubscriptionStreamers(req_json)
-            self.callback.trigger(VKAPIEventName.SUBSCRIPTION_STREAMERS, user_id=self.account_id, message=req_class)
+            self.callback.trigger(VKAPIEventName.SUBSCRIPTION_STREAMERS, user_id=self.user_id, message=req_class)
             return req_class
         else:
             return_data = None
@@ -32,7 +32,7 @@ class StreamersApi(BaseApi):
             req = self.request(STREAMERS_DROP_URL.format(limit, offset), "GET")
             req_json = req.json()
             req_class = VkapiDropStreamers(req_json)
-            self.callback.trigger(VKAPIEventName.DROP_STREAMERS, user_id=self.account_id, message=req_class)
+            self.callback.trigger(VKAPIEventName.DROP_STREAMERS, user_id=self.user_id, message=req_class)
             return req_class
         else:
             return_data = None
