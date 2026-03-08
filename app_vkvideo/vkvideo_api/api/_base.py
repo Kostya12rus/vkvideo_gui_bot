@@ -4,6 +4,8 @@ import threading
 from io import BytesIO
 from typing import Any, Unpack, Optional, Union, TypedDict
 from urllib.parse import urlparse
+
+from curl_cffi.requests.exceptions import Timeout
 from loguru import logger
 
 import curl_cffi
@@ -90,7 +92,16 @@ class BaseApi:
 
         with self.__request_semaphore:
             with curl_cffi.Session(**default_kwargs) as session:
-                req = session.request(method=method, url=full_url, timeout=MAX_TIMEOUT_IN_SECONDS, **kwargs)
+                for _ in range(MAX_RETRIES):
+                    try:
+                        req = session.request(method=method, url=full_url, timeout=MAX_TIMEOUT_IN_SECONDS, **kwargs)
+                        break
+                    except Timeout:
+                        logger.error(f"[Timeout] Источник не прислал ответ на запрос: {method}, {full_url}")
+                        continue
+                    except Exception as e:
+                        logger.error(f"[{e.__class__.__name__}] Источник не прислал ответ на запрос: {method}, {full_url}")
+                        continue
                 if not req.ok:
                     logger.error(f"{method}, {req.status_code}, {req.elapsed}, {full_url}")
                 # else:

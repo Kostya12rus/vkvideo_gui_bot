@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 
 class WebSocketClientApi:
     is_debug = False
-    _run_lock = threading.Lock()
 
     def __init__(self, vk_api: "VKVideoApi"):
         self.vk_api = vk_api
@@ -32,6 +31,7 @@ class WebSocketClientApi:
         self.__wss_timeout = 30
 
         self.__is_run: bool = False
+        self.__lock_connect = threading.Lock()
         self.__thread_read_message: Optional[threading.Thread] = None
         self.__thread_stop_event = threading.Event()
 
@@ -45,7 +45,7 @@ class WebSocketClientApi:
             return
         self.__is_run = is_run
 
-        with self._run_lock:
+        with self.__lock_connect:
             self._initialize_callback()
             if self.__is_run:
                 self._connect()
@@ -76,6 +76,7 @@ class WebSocketClientApi:
         self.__thread_read_message.start()
 
         self.__send_token()
+        logger.info(f"[{self.vk_api.user_id}]: Авторизовался в WSS соединения к VKLive")
 
     def _close(self):
         if self.__wss:
@@ -111,12 +112,12 @@ class WebSocketClientApi:
         if not streamer_wss_channels:
             return
 
-        logger.info(
-            f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
-            f"Подписываюсь на {len(streamer_wss_channels)} событий стримера"
-        )
         for channel in streamer_wss_channels:
             self._send_message({"subscribe": {"channel": channel}, "id": self.__get_wss_req_id()})
+        logger.info(
+            f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
+            f"Подписался на {len(streamer_wss_channels)} событий стримера"
+        )
 
     def unsubscribe_streamer(self, streamer_nickname: str = None):
         if not not self.__is_run or not streamer_nickname:
@@ -134,12 +135,12 @@ class WebSocketClientApi:
                 if streamer_wss_channels:
                     self.streamer_subscribe[streamer_nickname] = streamer_wss_channels
 
-        logger.info(
-            f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
-            f"Отписываюсь от {len(streamer_wss_channels)} событий стримера"
-        )
         for channel in streamer_wss_channels:
             self._send_message({"unsubscribe": {"channel": channel}, "id": self.__get_wss_req_id()})
+        logger.info(
+            f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
+            f"Отписался от {len(streamer_wss_channels)} событий стримера"
+        )
         del self.streamer_subscribe[clear_streamer_nickname]
 
     def _send_message(self, message: dict | list | str):
@@ -149,8 +150,11 @@ class WebSocketClientApi:
             pass
         else:
             return
-        self.__wss.send(message)
-        # logger.debug(f"Message send: {data}")
+        with self.__lock_connect:
+            if not self.__wss.connected:
+                return
+            self.__wss.send(message)
+            # logger.debug(f"Message send: {data}")
 
     def _loop_read_message(self):
         """Основной цикл чтения сообщений."""
@@ -191,13 +195,15 @@ class WebSocketClientApi:
             self.is_run = False
 
     def __send_token(self):
-        self._send_message({
-            "connect": {
-                "name": "js",
-                "token": self.__wss_token,
-            },
-            "id": self.__get_wss_req_id()
-        })
+        self.__wss.send(json.dumps(
+            {
+                "connect": {
+                    "name": "js",
+                    "token": self.__wss_token,
+                },
+                "id": self.__get_wss_req_id()
+            }
+        ))
 
     def __get_wss_req_id(self) -> int:
         self.__wss_req_id += 1

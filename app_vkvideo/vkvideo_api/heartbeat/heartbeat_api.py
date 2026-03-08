@@ -104,46 +104,52 @@ class HeartbeatApi:
             self.__thread_stop_event.wait(random.randint(5, 10) + random.random())
 
     def __send_heartbeat_viewer(self, send_type: str = "") -> int | float | None:
-        req = self.vk_api.request(
-            USER_HEARTBEAT_VIEWER_URL.format(self.streamer_nickname, self.streamer_stream_id) + send_type,
-            "PUT",
-            headers={
-                "Accept": "application/json, text/plain, */*",
-                "accept-encoding": "gzip, deflate, br, zstd",
-                "accept-language": "ru,en;q=0.9",
-                "Content-Type": "application/x-www-form-urlencoded",
-                "origin": BASE_URL,
-                "referer": f"{BASE_URL}/{self.streamer_nickname}",
-                "x-app": "streams_web",
-                "x-from-id": str(uuid.uuid4()),
-            }
-        )
-
-        if req.status_code == 404:
-            logger.error(
-                f"{self.user_id}: '{self.streamer_nickname}'[{self.streamer_id}] "
-                f"Поток просмотра стримера помер, статус ответа '{req.status_code}'"
+        try:
+            req = self.vk_api.request(
+                USER_HEARTBEAT_VIEWER_URL.format(self.streamer_nickname, self.streamer_stream_id) + send_type,
+                "PUT",
+                headers={
+                    "Accept": "application/json, text/plain, */*",
+                    "accept-encoding": "gzip, deflate, br, zstd",
+                    "accept-language": "ru,en;q=0.9",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "origin": BASE_URL,
+                    "referer": f"{BASE_URL}/{self.streamer_nickname}",
+                    "x-app": "streams_web",
+                    "x-from-id": str(uuid.uuid4()),
+                }
             )
-            self.streamer_is_online = False
-            self.streamer_stream_id = ""
-            return None
-        elif not req.ok:
+
+            if req.status_code == 404:
+                logger.error(
+                    f"{self.user_id}: '{self.streamer_nickname}'[{self.streamer_id}] "
+                    f"Поток просмотра стримера помер, статус ответа '{req.status_code}'"
+                )
+                self.streamer_is_online = False
+                self.streamer_stream_id = ""
+                return None
+            elif not req.ok:
+                logger.error(
+                    f"{self.user_id}: '{self.streamer_nickname}'[{self.streamer_id}] "
+                    f"Поток просмотра стримера помер, статус ответа '{req.status_code}'"
+                )
+                return None
+
+            req_json = req.json()
+            interval = req_json.get('data', {}).get('nextRequestInterval')
+            if not isinstance(interval, (int, float)):
+                logger.error(
+                    f"Поток просмотра стримера '{self.streamer_nickname}' не вернул интервал времени, "
+                    f"статус ответа '{req.status_code}', полученый ответ '{req_json}'"
+                )
+                return None
+
+            return interval
+        except Exception as e:  # noqa
             logger.error(
-                f"{self.user_id}: '{self.streamer_nickname}'[{self.streamer_id}] "
-                f"Поток просмотра стримера помер, статус ответа '{req.status_code}'"
+                f"[{self.streamer_nickname}]: Не удалось пингануть о просмотре стрима"
             )
             return None
-
-        req_json = req.json()
-        interval = req_json.get('data', {}).get('nextRequestInterval')
-        if not isinstance(interval, (int, float)):
-            logger.error(
-                f"Поток просмотра стримера '{self.streamer_nickname}' не вернул интервал времени, "
-                f"статус ответа '{req.status_code}', полученый ответ '{req_json}'"
-            )
-            return None
-
-        return interval
 
     def update_streamer_stream_info(
             self,
