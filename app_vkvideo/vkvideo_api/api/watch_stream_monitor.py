@@ -272,6 +272,7 @@ class WatchStreamMonitor:
             f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
             f"Начал новую трансляцию ({is_hosting=})"
         )
+        self.get_streamer_stream_info(_streamer_nickname)
 
     def __on_stream_slot_end_channel_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: WssStreamSlotEndChannelInfo):
         if str(user_id) != str(self.user_id):
@@ -282,3 +283,4 @@ class WatchStreamMonitor:
             f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
             f"Завершил трансляцию"
         )
+        self.get_streamer_stream_info(_streamer_nickname)

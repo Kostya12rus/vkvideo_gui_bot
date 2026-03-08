@@ -13,12 +13,17 @@ time_log = time.strftime("%Y-%m-%d")  # _%H-%M-%S
 FORMAT_LOG = (
     "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
     "<level>{level: <8}</level> | "
+    "<b>{message}</b>"
+)
+DEBUG_FORMAT_LOG = (
+    "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+    "<level>{level: <8}</level> | "
     "<cyan>{name}:{function}:{line}</cyan> - <b>{message}</b>"
 )
 
 logger.add(
     logs_folder / f'{time_log}_logs.log',
-    format=FORMAT_LOG,
+    format=DEBUG_FORMAT_LOG,
     level="INFO",
     enqueue=True,
     rotation="1 MB",
@@ -56,7 +61,7 @@ if sys.stdout:
 
     logger.add(
         logs_folder / f'{time_log}_debug.log',
-        format=FORMAT_LOG,
+        format=DEBUG_FORMAT_LOG,
         level="DEBUG",
         enqueue=True,
         rotation="100 MB",
