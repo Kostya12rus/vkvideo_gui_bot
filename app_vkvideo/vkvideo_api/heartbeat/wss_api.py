@@ -23,6 +23,7 @@ class WebSocketClientApi:
     def __init__(self, vk_api: "VKVideoApi"):
         self.vk_api = vk_api
         self.streamer_subscribe: dict[str, set] = {}
+        self.streamers_inited: dict[str, str] = {}
 
         self.__callback = self.vk_api.callback
 
@@ -58,11 +59,10 @@ class WebSocketClientApi:
         if self.__wss and self.__wss.connected:
             return
 
-        if not self.__wss_token:
-            logger.info(f"[{self.vk_api.user_id}]: Получаю токен пользователя для WSS соединения...")
-            user_data = self.vk_api.current_user_info()
-            self.__wss_token = user_data['webSocket']['token']
-            logger.info(f"[{self.vk_api.user_id}]: Токен WSS соединения получен '{self.__wss_token[:10]}...'")
+        logger.info(f"[{self.vk_api.user_id}]: Получаю токен пользователя для WSS соединения...")
+        user_data = self.vk_api.current_user_info()
+        self.__wss_token = user_data['webSocket']['token']
+        logger.info(f"[{self.vk_api.user_id}]: Токен WSS соединения получен '{self.__wss_token[:10]}...'")
 
         logger.info(f"[{self.vk_api.user_id}]: Подключаю WSS соединения к VKLive")
         self.__wss = websocket.create_connection(
@@ -73,12 +73,14 @@ class WebSocketClientApi:
         )
         logger.info(f"[{self.vk_api.user_id}]: Статус WSS соединения к VKLive: status={self.__wss.connected}")
 
+        self.__wss_req_id = 0
         self.__thread_stop_event.clear()
         self.__thread_read_message = threading.Thread(target=self._loop_read_message, daemon=True)
         self.__thread_read_message.start()
 
         self.__send_token()
         logger.info(f"[{self.vk_api.user_id}]: Авторизовался в WSS соединения к VKLive")
+
 
     def _close(self):
         if self.__wss:
@@ -114,7 +116,9 @@ class WebSocketClientApi:
             return
 
         messages = [{"subscribe": {"channel": c}, "id": self.__get_wss_req_id()} for c in streamer_wss_channels]
-        self._send_message("\n".join([json.dumps(m) for m in messages]))
+        message = "\n".join([json.dumps(m) for m in messages])
+        self._send_message(message)
+        self.streamers_inited[clear_streamer_nickname] = message
 
         logger.info(
             f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
@@ -138,7 +142,10 @@ class WebSocketClientApi:
                     self.streamer_subscribe[streamer_nickname] = streamer_wss_channels
 
         messages = [{"unsubscribe": {"channel": c}, "id": self.__get_wss_req_id()} for c in streamer_wss_channels]
-        self._send_message("\n".join([json.dumps(m) for m in messages]))
+        message = "\n".join([json.dumps(m) for m in messages])
+        self._send_message(message)
+        if clear_streamer_nickname in self.streamers_inited:
+            del self.streamers_inited[clear_streamer_nickname]
 
         logger.info(
             f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
@@ -203,6 +210,9 @@ class WebSocketClientApi:
                 if self.__thread_stop_event.wait(random.randint(1, 5) + random.random()):
                     return
                 self._connect()
+                if self.streamers_inited:
+                    for message in self.streamers_inited.values():
+                        threading.Thread(target=self._send_message, args=(message,), daemon=True).start()
 
     def __thread_check_message(self, message: dict):
         # logger.debug(f"Message received: {message}")
