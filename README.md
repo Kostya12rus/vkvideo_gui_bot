@@ -3,23 +3,10 @@
 Приложение на Python для авто просмотра стримеров VKVideo.
 
 ## Установка
-
-```bash
-pip install --force-reinstall git+https://github.com/Kostya12rus/vkvideo_gui_bot.git
-```
+Установка через скрипт [update_install.bat](update_install.bat) или команда `pip install --force-reinstall git+https://github.com/Kostya12rus/vkvideo_gui_bot.git`
 
 ## Использование
-
 ### GUI приложение
-
-Запустите приложение:
-
-```bash
-vkvideo_gui_bot
-```
-
+Запуск через скрипт [start_gui.bat](start_gui.bat) или команду `vkvideo_gui_bot_gui`
 ### Консольная версия
-
-```bash
-vkvideo_gui_bot_console
-```
+Запуск через скрипт [start.bat](start.bat) или команду `vkvideo_gui_bot_console`

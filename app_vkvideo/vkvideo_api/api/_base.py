@@ -9,7 +9,7 @@ from loguru import logger
 import curl_cffi
 from curl_cffi.requests.session import HttpMethod
 
-from app.utils import CallbackManager
+from app_vkvideo.utils import CallbackManager
 from ..config import *
 
 

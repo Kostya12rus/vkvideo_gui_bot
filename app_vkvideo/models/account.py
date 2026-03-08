@@ -2,7 +2,7 @@ from typing import Optional, Any
 
 from peewee import CharField, IntegerField
 
-from app.utils import decrypt_text, encrypt_text
+from app_vkvideo.utils import decrypt_text, encrypt_text
 from ._base_model import BaseModel
 
 

@@ -1,8 +1,9 @@
 import time
 
-from vkvideo_api import VKVideoApi
-from models import init_db, Account
 from loguru import logger
+
+from models import init_db, Account
+from vkvideo_api import VKVideoApi
 
 
 def run():
@@ -38,3 +39,5 @@ def run():
         time.sleep(1)
 
 
+if __name__ == "__main__":
+    run()

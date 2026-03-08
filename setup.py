@@ -29,6 +29,7 @@ setup(
     install_requires=parse_requirements(),
     entry_points={
         "console_scripts": [
+            "vkvideo_gui_bot_gui=app_vkvideo.run:run",
             "vkvideo_gui_bot_console=app_vkvideo.run_console:run",
         ],
     },

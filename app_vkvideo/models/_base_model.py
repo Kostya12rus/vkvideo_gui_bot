@@ -3,7 +3,7 @@ import pathlib
 
 from peewee import Model, SqliteDatabase
 
-from app.config import Config
+from app_vkvideo.config import Config
 
 db_path = pathlib.Path(Config.DATABASE_PATH)
 db_path.parent.mkdir(parents=True, exist_ok=True)
