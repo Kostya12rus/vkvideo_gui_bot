@@ -2,8 +2,8 @@ import time
 
 from loguru import logger
 
-from models import init_db, Account
-from vkvideo_api import VKVideoApi
+from .models import init_db, Account
+from .vkvideo_api import VKVideoApi
 
 
 def run():
