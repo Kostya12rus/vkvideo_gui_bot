@@ -1,0 +1,995 @@
+[
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "data": {
+            "votePrice": 300,
+            "createdAt": 1772914053,
+            "title": "Кто победит?",
+            "duration": 180,
+            "allowAdditionalVotes": true,
+            "creator": {
+              "nick": "Sejamin",
+              "id": 29911682,
+              "name": "Sejamin"
+            },
+            "state": "active",
+            "hideResults": false,
+            "id": 15261,
+            "decisions": [
+              {
+                "order": 0,
+                "name": "Кагеро",
+                "id": 43613,
+                "isWinner": false
+              },
+              {
+                "name": "Влад",
+                "id": 43614,
+                "isWinner": false,
+                "order": 1
+              }
+            ]
+          },
+          "type": "poll"
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "type": "poll",
+          "data": {
+            "hideResults": false,
+            "title": "Кто победит?",
+            "createdAt": 1772914053,
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "votersCount": 1,
+            "pointsBank": 0,
+            "state": "active",
+            "id": 15261,
+            "votesCount": 1,
+            "decisions": [
+              {
+                "order": 0,
+                "isWinner": false,
+                "votesPointAmount": 0,
+                "id": 43613,
+                "votesCount": 0,
+                "name": "Кагеро",
+                "votersCount": 0
+              },
+              {
+                "votesCount": 1,
+                "id": 43614,
+                "name": "Влад",
+                "votersCount": 1,
+                "order": 1,
+                "votesPointAmount": 0,
+                "isWinner": false
+              }
+            ],
+            "creator": {
+              "id": 29911682,
+              "name": "Sejamin",
+              "nick": "Sejamin"
+            },
+            "duration": 180
+          }
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "type": "poll",
+          "data": {
+            "id": 15261,
+            "votesCount": 2,
+            "decisions": [
+              {
+                "isWinner": false,
+                "votesPointAmount": 0,
+                "order": 0,
+                "votersCount": 1,
+                "name": "Кагеро",
+                "id": 43613,
+                "votesCount": 1
+              },
+              {
+                "votesCount": 1,
+                "id": 43614,
+                "name": "Влад",
+                "votersCount": 1,
+                "order": 1,
+                "votesPointAmount": 0,
+                "isWinner": false
+              }
+            ],
+            "creator": {
+              "id": 29911682,
+              "name": "Sejamin",
+              "nick": "Sejamin"
+            },
+            "duration": 180,
+            "pointsBank": 0,
+            "state": "active",
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "votersCount": 2,
+            "hideResults": false,
+            "title": "Кто победит?",
+            "createdAt": 1772914053
+          }
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "data": {
+            "createdAt": 1772914053,
+            "hideResults": false,
+            "title": "Кто победит?",
+            "votersCount": 2,
+            "allowAdditionalVotes": true,
+            "votePrice": 300,
+            "state": "active",
+            "pointsBank": 300,
+            "decisions": [
+              {
+                "votersCount": 1,
+                "name": "Кагеро",
+                "id": 43613,
+                "votesCount": 2,
+                "isWinner": false,
+                "votesPointAmount": 300,
+                "order": 0
+              },
+              {
+                "name": "Влад",
+                "votersCount": 1,
+                "votesCount": 1,
+                "id": 43614,
+                "votesPointAmount": 0,
+                "isWinner": false,
+                "order": 1
+              }
+            ],
+            "duration": 180,
+            "creator": {
+              "id": 29911682,
+              "nick": "Sejamin",
+              "name": "Sejamin"
+            },
+            "id": 15261,
+            "votesCount": 3
+          },
+          "type": "poll"
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "data": {
+            "title": "Кто победит?",
+            "hideResults": false,
+            "createdAt": 1772914053,
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "votersCount": 3,
+            "pointsBank": 300,
+            "state": "active",
+            "votesCount": 4,
+            "id": 15261,
+            "duration": 180,
+            "creator": {
+              "id": 29911682,
+              "nick": "Sejamin",
+              "name": "Sejamin"
+            },
+            "decisions": [
+              {
+                "votesPointAmount": 300,
+                "isWinner": false,
+                "order": 0,
+                "votersCount": 2,
+                "name": "Кагеро",
+                "votesCount": 3,
+                "id": 43613
+              },
+              {
+                "id": 43614,
+                "votesCount": 1,
+                "votersCount": 1,
+                "name": "Влад",
+                "order": 1,
+                "isWinner": false,
+                "votesPointAmount": 0
+              }
+            ]
+          },
+          "type": "poll"
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "type": "poll",
+          "data": {
+            "createdAt": 1772914053,
+            "hideResults": false,
+            "title": "Кто победит?",
+            "votersCount": 4,
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "state": "active",
+            "pointsBank": 300,
+            "decisions": [
+              {
+                "id": 43613,
+                "votesCount": 4,
+                "name": "Кагеро",
+                "votersCount": 3,
+                "order": 0,
+                "isWinner": false,
+                "votesPointAmount": 300
+              },
+              {
+                "order": 1,
+                "votesPointAmount": 0,
+                "isWinner": false,
+                "votesCount": 1,
+                "id": 43614,
+                "votersCount": 1,
+                "name": "Влад"
+              }
+            ],
+            "creator": {
+              "id": 29911682,
+              "nick": "Sejamin",
+              "name": "Sejamin"
+            },
+            "duration": 180,
+            "id": 15261,
+            "votesCount": 5
+          }
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "data": {
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "votersCount": 6,
+            "title": "Кто победит?",
+            "hideResults": false,
+            "createdAt": 1772914053,
+            "votesCount": 7,
+            "id": 15261,
+            "creator": {
+              "nick": "Sejamin",
+              "name": "Sejamin",
+              "id": 29911682
+            },
+            "duration": 180,
+            "decisions": [
+              {
+                "isWinner": false,
+                "votesPointAmount": 300,
+                "order": 0,
+                "name": "Кагеро",
+                "votersCount": 5,
+                "id": 43613,
+                "votesCount": 6
+              },
+              {
+                "order": 1,
+                "isWinner": false,
+                "votesPointAmount": 0,
+                "id": 43614,
+                "votesCount": 1,
+                "name": "Влад",
+                "votersCount": 1
+              }
+            ],
+            "pointsBank": 300,
+            "state": "active"
+          },
+          "type": "poll"
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "type": "poll",
+          "data": {
+            "allowAdditionalVotes": true,
+            "votePrice": 300,
+            "votersCount": 7,
+            "title": "Кто победит?",
+            "hideResults": false,
+            "createdAt": 1772914053,
+            "votesCount": 8,
+            "id": 15261,
+            "duration": 180,
+            "creator": {
+              "id": 29911682,
+              "nick": "Sejamin",
+              "name": "Sejamin"
+            },
+            "decisions": [
+              {
+                "order": 0,
+                "isWinner": false,
+                "votesPointAmount": 300,
+                "id": 43613,
+                "votesCount": 7,
+                "votersCount": 6,
+                "name": "Кагеро"
+              },
+              {
+                "id": 43614,
+                "votesCount": 1,
+                "votersCount": 1,
+                "name": "Влад",
+                "order": 1,
+                "isWinner": false,
+                "votesPointAmount": 0
+              }
+            ],
+            "pointsBank": 300,
+            "state": "active"
+          }
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "type": "poll",
+          "data": {
+            "pointsBank": 600,
+            "state": "active",
+            "id": 15261,
+            "votesCount": 9,
+            "decisions": [
+              {
+                "isWinner": false,
+                "votesPointAmount": 600,
+                "order": 0,
+                "votersCount": 6,
+                "name": "Кагеро",
+                "id": 43613,
+                "votesCount": 8
+              },
+              {
+                "order": 1,
+                "isWinner": false,
+                "votesPointAmount": 0,
+                "id": 43614,
+                "votesCount": 1,
+                "votersCount": 1,
+                "name": "Влад"
+              }
+            ],
+            "duration": 180,
+            "creator": {
+              "name": "Sejamin",
+              "nick": "Sejamin",
+              "id": 29911682
+            },
+            "hideResults": false,
+            "title": "Кто победит?",
+            "createdAt": 1772914053,
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "votersCount": 7
+          }
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "data": {
+            "pointsBank": 900,
+            "state": "active",
+            "votesCount": 11,
+            "id": 15261,
+            "creator": {
+              "name": "Sejamin",
+              "nick": "Sejamin",
+              "id": 29911682
+            },
+            "duration": 180,
+            "decisions": [
+              {
+                "order": 0,
+                "isWinner": false,
+                "votesPointAmount": 900,
+                "id": 43613,
+                "votesCount": 9,
+                "name": "Кагеро",
+                "votersCount": 6
+              },
+              {
+                "votersCount": 2,
+                "name": "Влад",
+                "id": 43614,
+                "votesCount": 2,
+                "isWinner": false,
+                "votesPointAmount": 0,
+                "order": 1
+              }
+            ],
+            "title": "Кто победит?",
+            "hideResults": false,
+            "createdAt": 1772914053,
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "votersCount": 8
+          },
+          "type": "poll"
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "type": "poll",
+          "data": {
+            "state": "active",
+            "pointsBank": 900,
+            "creator": {
+              "id": 29911682,
+              "nick": "Sejamin",
+              "name": "Sejamin"
+            },
+            "duration": 180,
+            "decisions": [
+              {
+                "order": 0,
+                "votesPointAmount": 900,
+                "isWinner": false,
+                "votesCount": 10,
+                "id": 43613,
+                "votersCount": 7,
+                "name": "Кагеро"
+              },
+              {
+                "votersCount": 2,
+                "name": "Влад",
+                "votesCount": 2,
+                "id": 43614,
+                "votesPointAmount": 0,
+                "isWinner": false,
+                "order": 1
+              }
+            ],
+            "votesCount": 12,
+            "id": 15261,
+            "createdAt": 1772914053,
+            "title": "Кто победит?",
+            "hideResults": false,
+            "votersCount": 9,
+            "votePrice": 300,
+            "allowAdditionalVotes": true
+          }
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "data": {
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "votersCount": 10,
+            "hideResults": false,
+            "title": "Кто победит?",
+            "createdAt": 1772914053,
+            "id": 15261,
+            "votesCount": 13,
+            "decisions": [
+              {
+                "votesCount": 10,
+                "id": 43613,
+                "name": "Кагеро",
+                "votersCount": 7,
+                "order": 0,
+                "votesPointAmount": 900,
+                "isWinner": false
+              },
+              {
+                "id": 43614,
+                "votesCount": 3,
+                "votersCount": 3,
+                "name": "Влад",
+                "order": 1,
+                "isWinner": false,
+                "votesPointAmount": 0
+              }
+            ],
+            "creator": {
+              "id": 29911682,
+              "name": "Sejamin",
+              "nick": "Sejamin"
+            },
+            "duration": 180,
+            "pointsBank": 900,
+            "state": "active"
+          },
+          "type": "poll"
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "data": {
+            "pointsBank": 900,
+            "state": "active",
+            "votesCount": 14,
+            "id": 15261,
+            "duration": 180,
+            "creator": {
+              "id": 29911682,
+              "name": "Sejamin",
+              "nick": "Sejamin"
+            },
+            "decisions": [
+              {
+                "order": 0,
+                "votesPointAmount": 900,
+                "isWinner": false,
+                "votesCount": 11,
+                "id": 43613,
+                "name": "Кагеро",
+                "votersCount": 8
+              },
+              {
+                "name": "Влад",
+                "votersCount": 3,
+                "votesCount": 3,
+                "id": 43614,
+                "votesPointAmount": 0,
+                "isWinner": false,
+                "order": 1
+              }
+            ],
+            "title": "Кто победит?",
+            "hideResults": false,
+            "createdAt": 1772914053,
+            "allowAdditionalVotes": true,
+            "votePrice": 300,
+            "votersCount": 11
+          },
+          "type": "poll"
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "type": "poll",
+          "data": {
+            "hideResults": false,
+            "title": "Кто победит?",
+            "createdAt": 1772914053,
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "votersCount": 11,
+            "pointsBank": 1200,
+            "state": "active",
+            "id": 15261,
+            "votesCount": 15,
+            "decisions": [
+              {
+                "id": 43613,
+                "votesCount": 11,
+                "votersCount": 8,
+                "name": "Кагеро",
+                "order": 0,
+                "isWinner": false,
+                "votesPointAmount": 900
+              },
+              {
+                "votersCount": 3,
+                "name": "Влад",
+                "votesCount": 4,
+                "id": 43614,
+                "votesPointAmount": 300,
+                "isWinner": false,
+                "order": 1
+              }
+            ],
+            "duration": 180,
+            "creator": {
+              "nick": "Sejamin",
+              "name": "Sejamin",
+              "id": 29911682
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "type": "poll",
+          "data": {
+            "id": 15261,
+            "votesCount": 16,
+            "decisions": [
+              {
+                "votersCount": 8,
+                "name": "Кагеро",
+                "id": 43613,
+                "votesCount": 11,
+                "isWinner": false,
+                "votesPointAmount": 900,
+                "order": 0
+              },
+              {
+                "order": 1,
+                "isWinner": false,
+                "votesPointAmount": 600,
+                "id": 43614,
+                "votesCount": 5,
+                "name": "Влад",
+                "votersCount": 3
+              }
+            ],
+            "duration": 180,
+            "creator": {
+              "id": 29911682,
+              "name": "Sejamin",
+              "nick": "Sejamin"
+            },
+            "pointsBank": 1500,
+            "state": "active",
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "votersCount": 11,
+            "hideResults": false,
+            "title": "Кто победит?",
+            "createdAt": 1772914053
+          }
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "data": {
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "votersCount": 12,
+            "title": "Кто победит?",
+            "hideResults": false,
+            "createdAt": 1772914053,
+            "votesCount": 17,
+            "id": 15261,
+            "duration": 180,
+            "creator": {
+              "id": 29911682,
+              "nick": "Sejamin",
+              "name": "Sejamin"
+            },
+            "decisions": [
+              {
+                "name": "Кагеро",
+                "votersCount": 9,
+                "votesCount": 12,
+                "id": 43613,
+                "votesPointAmount": 900,
+                "isWinner": false,
+                "order": 0
+              },
+              {
+                "name": "Влад",
+                "votersCount": 3,
+                "id": 43614,
+                "votesCount": 5,
+                "isWinner": false,
+                "votesPointAmount": 600,
+                "order": 1
+              }
+            ],
+            "pointsBank": 1500,
+            "state": "active"
+          },
+          "type": "poll"
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "data": {
+            "createdAt": 1772914053,
+            "hideResults": false,
+            "title": "Кто победит?",
+            "votersCount": 13,
+            "allowAdditionalVotes": true,
+            "votePrice": 300,
+            "state": "active",
+            "pointsBank": 1500,
+            "decisions": [
+              {
+                "id": 43613,
+                "votesCount": 13,
+                "votersCount": 10,
+                "name": "Кагеро",
+                "order": 0,
+                "isWinner": false,
+                "votesPointAmount": 900
+              },
+              {
+                "votesCount": 5,
+                "id": 43614,
+                "name": "Влад",
+                "votersCount": 3,
+                "order": 1,
+                "votesPointAmount": 600,
+                "isWinner": false
+              }
+            ],
+            "duration": 180,
+            "creator": {
+              "id": 29911682,
+              "nick": "Sejamin",
+              "name": "Sejamin"
+            },
+            "id": 15261,
+            "votesCount": 18
+          },
+          "type": "poll"
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "data": {
+            "decisions": [
+              {
+                "id": 43613,
+                "votesCount": 13,
+                "votersCount": 10,
+                "name": "Кагеро",
+                "order": 0,
+                "isWinner": false,
+                "votesPointAmount": 900
+              },
+              {
+                "votesPointAmount": 600,
+                "isWinner": false,
+                "order": 1,
+                "name": "Влад",
+                "votersCount": 4,
+                "votesCount": 6,
+                "id": 43614
+              }
+            ],
+            "duration": 180,
+            "creator": {
+              "name": "Sejamin",
+              "nick": "Sejamin",
+              "id": 29911682
+            },
+            "id": 15261,
+            "votesCount": 19,
+            "state": "active",
+            "pointsBank": 1500,
+            "votersCount": 14,
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "createdAt": 1772914053,
+            "hideResults": false,
+            "title": "Кто победит?"
+          },
+          "type": "poll"
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "type": "poll",
+          "data": {
+            "decisions": [
+              {
+                "votesPointAmount": 1200,
+                "isWinner": false,
+                "order": 0,
+                "name": "Кагеро",
+                "votersCount": 10,
+                "votesCount": 14,
+                "id": 43613
+              },
+              {
+                "id": 43614,
+                "votesCount": 6,
+                "votersCount": 4,
+                "name": "Влад",
+                "order": 1,
+                "isWinner": false,
+                "votesPointAmount": 600
+              }
+            ],
+            "duration": 180,
+            "creator": {
+              "id": 29911682,
+              "name": "Sejamin",
+              "nick": "Sejamin"
+            },
+            "id": 15261,
+            "votesCount": 20,
+            "state": "active",
+            "pointsBank": 1800,
+            "votersCount": 14,
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "createdAt": 1772914053,
+            "hideResults": false,
+            "title": "Кто победит?"
+          }
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "data": {
+            "decisions": [
+              {
+                "isWinner": true,
+                "votesPointAmount": 1200,
+                "order": 0,
+                "name": "Кагеро",
+                "votersCount": 10,
+                "id": 43613,
+                "votesCount": 14
+              },
+              {
+                "order": 1,
+                "votesPointAmount": 600,
+                "isWinner": false,
+                "votesCount": 6,
+                "id": 43614,
+                "name": "Влад",
+                "votersCount": 4
+              }
+            ],
+            "creator": {
+              "nick": "Sejamin",
+              "name": "Sejamin",
+              "id": 29911682
+            },
+            "duration": 180,
+            "id": 15261,
+            "votesCount": 20,
+            "topVoters": [
+              {
+                "voter": {
+                  "id": 29787765,
+                  "name": "CBOsi",
+                  "nick": "CBOsi"
+                },
+                "pointsSpent": 600
+              },
+              {
+                "pointsSpent": 300,
+                "voter": {
+                  "id": 19720810,
+                  "name": "ggvp33",
+                  "nick": "ggvp33"
+                }
+              },
+              {
+                "voter": {
+                  "nick": "Олег Луцай",
+                  "name": "Олег Луцай",
+                  "id": 29911378
+                },
+                "pointsSpent": 300
+              },
+              {
+                "voter": {
+                  "id": 31075418,
+                  "nick": "Роман Йогурт",
+                  "name": "Роман Йогурт"
+                },
+                "pointsSpent": 300
+              },
+              {
+                "voter": {
+                  "nick": "Павел Исаченко#8324888",
+                  "name": "Павел Исаченко#8324888",
+                  "id": 31358482
+                },
+                "pointsSpent": 300
+              }
+            ],
+            "state": "ended",
+            "pointsBank": 1800,
+            "votersCount": 14,
+            "votePrice": 300,
+            "allowAdditionalVotes": true,
+            "createdAt": 1772914053,
+            "hideResults": false,
+            "title": "Кто победит?"
+          },
+          "type": "poll"
+        }
+      }
+    }
+  }
+]

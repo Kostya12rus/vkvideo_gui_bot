@@ -1,0 +1,71 @@
+[
+  {
+    "push": {
+      "channel": "channel-info:29757797",
+      "pub": {
+        "data": {
+          "type": "public_video_stream_chat_settings_update",
+          "data": {
+            "sameMessageTimeout": 30,
+            "allowAccess": "subscribers",
+            "blogId": 29757797,
+            "mode": {
+              "kind": "only_smiles"
+            },
+            "channelId": 29757797,
+            "allowAccessAfter": 600,
+            "anyMessageTimeout": 10
+          }
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:12330765",
+      "pub": {
+        "data": {
+          "type": "public_video_stream_chat_settings_update",
+          "data": {
+            "channelId": 12330765,
+            "blogId": 12330765,
+            "allowAccessAfter": 0,
+            "sameMessageTimeout": 30,
+            "anyMessageTimeout": 1,
+            "mode": {
+              "isLinksProhibited": true,
+              "isCapsProhibited": false,
+              "kind": "general",
+              "isRuEnNumbers": false
+            },
+            "allowAccess": "any"
+          }
+        }
+      }
+    }
+  },
+  {
+    "push": {
+      "channel": "channel-info:12275881",
+      "pub": {
+        "data": {
+          "data": {
+            "anyMessageTimeout": 1,
+            "allowAccessAfter": 1800,
+            "channelId": 12275881,
+            "mode": {
+              "kind": "general",
+              "isRuEnNumbers": false,
+              "isLinksProhibited": true,
+              "isCapsProhibited": false
+            },
+            "allowAccess": "any",
+            "blogId": 12275881,
+            "sameMessageTimeout": 30
+          },
+          "type": "public_video_stream_chat_settings_update"
+        }
+      }
+    }
+  }
+]
