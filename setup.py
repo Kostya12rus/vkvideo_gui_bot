@@ -3,7 +3,7 @@ import pathlib
 from setuptools import setup, find_packages
 
 
-def parce_readme() -> str:
+def parse_readme() -> str:
     file_path = pathlib.Path("README.md")
     if not file_path.is_file(): return ""
     with open(file_path, encoding="utf-8") as fh:
@@ -22,14 +22,14 @@ setup(
     version="1.0.0",
     author="Kostya12rus",
     description="Приложение на Python для авто просмотра стримеров VKVideo",
-    long_description=parce_readme(),
+    long_description=parse_readme(),
     long_description_content_type="text/markdown",
     url="https://github.com/Kostya12rus/vkvideo_gui_bot",
     packages=find_packages(),
     install_requires=parse_requirements(),
     entry_points={
         "console_scripts": [
-            "vkvideo_gui_bot=app.main:main",
+            "vkvideo_gui_bot_console=app.run:run",
         ],
     },
     classifiers=[
