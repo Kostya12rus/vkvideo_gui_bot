@@ -204,7 +204,7 @@ class WatchStreamMonitor:
         if hasattr(self, "__init_callback"):
             return
         self.__init_callback = True
-        self.callback.register(VKAPIEventName.STREAMER_INFO, self.__on_streamer_info)
+        # self.callback.register(VKAPIEventName.STREAMER_INFO, self.__on_streamer_info)
         self.callback.register(VKAPIEventName.STREAMER_PENDING_BONUS, self.__on_streamer_pending_bonus)
         self.callback.register(VKAPIEventName.STREAMER_STREAM_INFO, self.__on_streamer_stream_info)
 
@@ -216,11 +216,11 @@ class WatchStreamMonitor:
         self.callback.register(WSSEventName.STREAM_SLOT_END_CHANNEL_INFO, self.__on_stream_slot_end_channel_info)
 
 
-    def __on_streamer_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerInfo):
-        if str(user_id) != str(self.user_id):
-            return
-        _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
-        # logger.debug(f"__on_streamer_info: {_streamer_nickname}, {_streamer_id}, {message}")
+    # def __on_streamer_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerInfo):
+    #     if str(user_id) != str(self.user_id):
+    #         return
+    #     _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
+    #     # logger.debug(f"__on_streamer_info: {_streamer_nickname}, {_streamer_id}, {message}")
 
     def __on_streamer_stream_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo):
         if str(user_id) != str(self.user_id):
@@ -299,7 +299,7 @@ class WatchStreamMonitor:
             f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
             f"Изменил рейд на {data.target.owner.display_name} (ID: {data.target.owner.id}) {data.status}"
         )
-        if data.status in ['started', 'created']:
+        if data.status in ['started', 'created', 'prepare']:
             self.streamer_raid_user_state(_streamer_nickname)
 
     def __on_stream_slot_start_channel_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: WssStreamSlotStartChannelInfo):

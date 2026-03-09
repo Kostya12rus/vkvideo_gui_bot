@@ -349,6 +349,8 @@ class WebSocketClientApi:
 
         all_ws_channels = self.__generate_wss_channel_from_data(message)
         if all_ws_channels:
+            if clear_streamer_nickname in self.streamers_inited:
+                self.unsubscribe_streamer(clear_streamer_nickname)
             self.streamer_subscribe[clear_streamer_nickname] = all_ws_channels
             self.subscribe_streamer(streamer_nickname)
 

@@ -183,8 +183,6 @@ class HeartbeatApi:
         self.__callback.register(WSSEventName.STREAM_SLOT_END_CHANNEL_INFO, self.__on_stream_slot_end_channel_info)
 
     def __on_streamer_info(self, streamer_id: int, user_id: int, message: VkapiStreamerInfo):
-        if not user_id or str(user_id) != str(self.user_id):
-            return
         streamer_nickname = message.blog_url
         if not streamer_nickname or str(streamer_nickname).lower() != str(self.streamer_nickname).lower():
             return
@@ -194,8 +192,6 @@ class HeartbeatApi:
             self._last_streamer_info = message
 
     def __on_streamer_stream_info(self, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo):
-        if not user_id or str(user_id) != str(self.user_id):
-            return
         streamer_nickname = message.data.stream.embed_url.split("/")[-1]
         if str(streamer_nickname) != str(self.streamer_nickname):
             return
