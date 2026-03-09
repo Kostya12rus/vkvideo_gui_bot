@@ -275,13 +275,6 @@ class WatchStreamMonitor:
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
 
         bonus = message.push.pub.data.data
-        # name = bonus.name
-        # description = bonus.description
-        # channel_point_amount = bonus.channel_point_amount
-        # logger.info(
-        #     f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
-        #     f"Получаю {channel_point_amount} поинтов за '{name}'({description})"
-        # )
         if bonus.id:
             self.streamer_pending_bonus_gather(_streamer_nickname, bonus.id)
 
@@ -299,8 +292,6 @@ class WatchStreamMonitor:
         )
 
     def __on_raid_status_channel_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: WssRaidStatusChannelInfo):
-        if str(user_id) != str(self.user_id):
-            return
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
 
         data = message.push.pub.data.data
@@ -312,8 +303,6 @@ class WatchStreamMonitor:
             self.streamer_raid_user_state(_streamer_nickname)
 
     def __on_stream_slot_start_channel_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: WssStreamSlotStartChannelInfo):
-        if str(user_id) != str(self.user_id):
-            return
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
 
         data = message.push.pub.data.data
@@ -325,8 +314,6 @@ class WatchStreamMonitor:
         self.get_streamer_stream_info(_streamer_nickname)
 
     def __on_stream_slot_end_channel_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: WssStreamSlotEndChannelInfo):
-        if str(user_id) != str(self.user_id):
-            return
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
 
         logger.info(

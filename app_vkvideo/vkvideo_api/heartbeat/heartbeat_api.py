@@ -207,8 +207,6 @@ class HeartbeatApi:
             self._last_streamer_stream_info = message
 
     def __channel_stream_channel_info(self, streamer_id: int, user_id: int, message: WssChannelStreamChannelInfo):
-        if not user_id or str(user_id) != str(self.user_id):
-            return
         if not streamer_id or str(streamer_id) != str(self.streamer_id):
             return
         data = message.push.pub.data.data
@@ -218,15 +216,11 @@ class HeartbeatApi:
             self._last_channel_stream_channel_info = message
 
     def __on_stream_slot_start_channel_info(self, streamer_id: int, user_id: int, message: WssStreamSlotStartChannelInfo):
-        if not user_id or str(user_id) != str(self.user_id):
-            return
         if not streamer_id or str(streamer_id) != str(self.streamer_id):
             return
         self.streamer_is_online = True
 
     def __on_stream_slot_end_channel_info(self, streamer_id: int, user_id: int, message: WssStreamSlotEndChannelInfo):
-        if not user_id or str(user_id) != str(self.user_id):
-            return
         if not streamer_id or str(streamer_id) != str(self.streamer_id):
             return
         self.streamer_is_online = False
