@@ -320,4 +320,3 @@ class WatchStreamMonitor:
             f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
             f"Завершил трансляцию"
         )
-        self.get_streamer_stream_info(_streamer_nickname)
