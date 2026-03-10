@@ -59,6 +59,18 @@ class StreamerApi(BaseApi):
         req_json = req.json()
         return req_json
 
+    def streamer_raid_viewer(self, streamer_nickname: str, raid_to_streamer_nickname: str) -> dict:
+        headers = self.__get_streamer_referer(streamer_nickname)
+        headers["Content-Type"] = "application/x-www-form-urlencoded"
+        headers["referer"] = BASE_URL + f"{raid_to_streamer_nickname}?raid_from={streamer_nickname}"
+        req = self.request(
+            STREAMER_RAID_VIEWER_URL.format(streamer_nickname),
+            "PUT",
+            headers=headers
+        )
+        req_json = req.json()
+        return req_json
+
 
     def streamer_follow(self, streamer_nickname: str) -> bool:
         req = self.request(

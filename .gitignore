@@ -184,6 +184,10 @@ cython_debug/
 # Flet
 storage/
 
+# Grafana
+monitoring/
+grafana/
+
 # Prompts
 changes.txt
 commits.txt

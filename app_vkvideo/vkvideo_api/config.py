@@ -31,6 +31,7 @@ STREAMER_DROP_PROGRESS_URL = "v1/channel/{}/stream/slot/default/drop_campaign/pr
 STREAMER_SMILE_URL = "v1/blog/{}/smile/user_set/?mode=public_video_stream" #c1ymba
 STREAMER_RAID_URL = "v1/channel/{}/stream/slot/default/raid" #c1ymba
 STREAMER_RAID_USER_STATE_URL = "v1/channel/{}/stream/slot/default/raid/user_state" #c1ymba
+STREAMER_RAID_VIEWER_URL = "v1/channel/{}/stream/slot/default/raid/viewer" #c1ymba
 STREAMER_POINT_URL = "v1/channel/{}/point" #c1ymba
 STREAMER_POINT_BONUS_URL = "v1/channel/{}/point/bonus/" #c1ymba
 STREAMER_POINT_REWARD_URL = "v1/channel/{}/point/reward/" #c1ymba

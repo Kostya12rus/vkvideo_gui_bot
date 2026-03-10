@@ -1,3 +1,4 @@
+import random
 import threading
 import time
 from typing import TYPE_CHECKING, TypeVar, Optional
@@ -74,7 +75,6 @@ class WatchStreamMonitor:
                 logger.exception("Watch all subscribers failed", exc_info=True)
             finally:
                 time.sleep(UPDATE_SUBSCRIPTIONS_LIST_INTERVAL)
-
 
     def stop_watch_all_subscribers(self: TVKVideoApi) -> None:
         if not self.is_watch_all_subscribers:
@@ -225,13 +225,31 @@ class WatchStreamMonitor:
     def __on_streamer_stream_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo):
         if str(user_id) != str(self.user_id):
             return
+        _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
         streamer_nickname = message.data.stream.embed_url.split("/")[-1]
+
+        logger.debug(
+            f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
+            f"Информация о стриме загружена, пытаюсь проверить на активные бонусы"
+        )
 
         self.get_streamer_pending_bonus(streamer_nickname)
         if not message.data.stream.is_online:
+            logger.debug(
+                f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
+                f"Стример сейчас оффлайн"
+            )
             return
 
+        logger.debug(
+            f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
+            f"Статус лайка на стриме {message.data.stream.id}: is_liked={message.data.stream.is_liked}"
+        )
         if not message.data.stream.is_liked:
+            logger.debug(
+                f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
+                f"Пытаюсь отправить лайк на стрим {message.data.stream.id}"
+            )
             self.streamer_set_like(streamer_nickname, message.data.stream.id)
 
     def __on_streamer_pending_bonus(self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerPendingBonus):
@@ -299,8 +317,13 @@ class WatchStreamMonitor:
             f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
             f"Изменил рейд на {data.target.owner.display_name} (ID: {data.target.owner.id}) {data.status}"
         )
-        if data.status in ['started', 'created', 'prepare']:
-            self.streamer_raid_user_state(_streamer_nickname)
+        if data.status in ['created', 'started']:
+            status = self.streamer_raid_user_state(data.owner.blog_url)
+            status_v = self.streamer_raid_viewer(data.owner.blog_url, data.target.blog_url)
+            logger.info(
+                f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
+                f"Участвую в рейде, статус: {status}, статус просмотра: {status_v}"
+            )
 
     def __on_stream_slot_start_channel_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: WssStreamSlotStartChannelInfo):
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
@@ -311,6 +334,7 @@ class WatchStreamMonitor:
             f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
             f"Начал новую трансляцию ({is_hosting=})"
         )
+        time.sleep(random.randint(0, 2) + random.random())
         self.get_streamer_stream_info(_streamer_nickname)
 
     def __on_stream_slot_end_channel_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: WssStreamSlotEndChannelInfo):
