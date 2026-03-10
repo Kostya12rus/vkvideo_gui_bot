@@ -233,7 +233,7 @@ class WatchStreamMonitor:
             f"Информация о стриме загружена, пытаюсь проверить на активные бонусы"
         )
 
-        self.get_streamer_pending_bonus(streamer_nickname)
+        threading.Thread(target=self.get_streamer_pending_bonus, args=(streamer_nickname,), daemon=True).start()
         if not message.data.stream.is_online:
             logger.debug(
                 f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
@@ -250,7 +250,9 @@ class WatchStreamMonitor:
                 f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
                 f"Пытаюсь отправить лайк на стрим {message.data.stream.id}"
             )
-            self.streamer_set_like(streamer_nickname, message.data.stream.id)
+            threading.Thread(
+                target=self.streamer_set_like, args=(streamer_nickname, message.data.stream.id), daemon=True
+            ).start()
 
     def __on_streamer_pending_bonus(self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerPendingBonus):
         if str(user_id) != str(self.user_id):

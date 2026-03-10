@@ -128,7 +128,7 @@ class WebSocketClientApi:
         )
 
     def unsubscribe_streamer(self, streamer_nickname: str = None):
-        if not not self.__is_run or not streamer_nickname:
+        if not self.__is_run or not streamer_nickname:
             return
 
         with self.__lock_connect:
