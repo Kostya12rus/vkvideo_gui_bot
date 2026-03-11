@@ -26,6 +26,10 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Kostya12rus/vkvideo_gui_bot",
     packages=find_packages(),
+    include_package_data=True,
+    package_data={
+        "app_vkvideo.monitoring": ["*.json"],
+    },
     install_requires=parse_requirements(),
     entry_points={
         "console_scripts": [
