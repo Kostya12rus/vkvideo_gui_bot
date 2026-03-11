@@ -2,7 +2,7 @@ import threading
 import weakref
 from typing import Any
 
-from monitoring import MetricsManager
+from app_vkvideo.monitoring import MetricsManager
 from .api import UserApi, StreamerApi, StreamersApi, WatchStreamMonitor
 from .auth import AuthModule
 from .heartbeat import WebSocketClientApi, HeartbeatApi
