@@ -90,7 +90,12 @@ class BaseApi:
         if not urlparse(url_path).hostname:
             full_url = API_URL + url_path
 
+        metrics_manager = getattr(self, "metrics_manager", None)
+        if metrics_manager is not None:
+            metrics_manager.inc_metric("vkapp_requests_all")
+
         with self.__request_semaphore:
+            req: Optional[curl_cffi.Response] = None
             with curl_cffi.Session(**default_kwargs) as session:
                 for _ in range(MAX_RETRIES):
                     try:
@@ -98,12 +103,24 @@ class BaseApi:
                         break
                     except Timeout:
                         logger.error(f"[Timeout] Источник не прислал ответ на запрос: {method}, {full_url}")
+                        if metrics_manager is not None:
+                            metrics_manager.inc_metric("vkapp_requests_with_error", code="timeout")
                         continue
                     except Exception as e:
                         logger.error(f"[{e.__class__.__name__}] Источник не прислал ответ на запрос: {method}, {full_url}")
+                        if metrics_manager is not None:
+                            metrics_manager.inc_metric("vkapp_requests_with_error", code=e.__class__.__name__.lower())
                         continue
+
+                if req is None:
+                    raise RuntimeError(f"Request failed after retries: {method} {full_url}")
+
                 if not req.ok:
                     logger.error(f"{method}, {req.status_code}, {req.elapsed}, {full_url}")
+                    if metrics_manager is not None:
+                        metrics_manager.inc_metric("vkapp_requests_with_error", code=str(req.status_code))
                 # else:
                 #     logger.debug(f"{method}, {req.status_code}, {req.elapsed}, {full_url}")
+                elif metrics_manager is not None:
+                    metrics_manager.inc_metric("vkapp_requests_success")
                 return req

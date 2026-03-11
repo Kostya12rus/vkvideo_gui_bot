@@ -38,6 +38,8 @@ class WatchStreamMonitor:
             self.wss_api.is_run = False
 
         self.heartbeat_streamers[streamer_nickname].is_run = False
+        del self.heartbeat_streamers[streamer_nickname]
+        self.metrics_manager.inc_metric("vkapp_streamers_heartbeat_lost_total")
 
 
     def start_watch_all_subscribers(self: TVKVideoApi) -> None:
@@ -199,6 +201,15 @@ class WatchStreamMonitor:
                     return heartbeat_class
         return None
 
+    def __inc_metric_streamers(self: TVKVideoApi) -> None:
+        self.metrics_manager.set_gauge("vkapp_streamers_all", float(len(self.heartbeat_streamers)))
+        active_streamers = [
+            o
+            for o in self.heartbeat_streamers.values()
+            if o.is_run and o.streamer_is_online
+        ]
+        self.metrics_manager.set_gauge("vkapp_streamers_heartbeat_active", float(len(active_streamers)))
+
 
     def _initialize_callback(self: TVKVideoApi) -> None:
         if hasattr(self, "__init_callback"):
@@ -223,6 +234,7 @@ class WatchStreamMonitor:
     #     # logger.debug(f"__on_streamer_info: {_streamer_nickname}, {_streamer_id}, {message}")
 
     def __on_streamer_stream_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo):
+        self.__inc_metric_streamers()
         if str(user_id) != str(self.user_id):
             return
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
@@ -310,6 +322,9 @@ class WatchStreamMonitor:
             f"Изменение баланса {data.delta} ({old_balance} -> {data.balance}) "
             f"за {data.reason.bonus.name or data.reason.type}({data.reason.bonus.description})"
         )
+        if data.delta > 0:
+            self.metrics_manager.inc_metric("vkapp_get_point_on_start", float(data.delta))
+        self.metrics_manager.set_gauge("vkapp_has_point_total", float(data.balance), streamer_nickname=_streamer_nickname)
 
     def __on_raid_status_channel_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: WssRaidStatusChannelInfo):
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)

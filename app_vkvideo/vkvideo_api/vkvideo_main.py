@@ -2,6 +2,7 @@ import threading
 import weakref
 from typing import Any
 
+from monitoring import MetricsManager
 from .api import UserApi, StreamerApi, StreamersApi, WatchStreamMonitor
 from .auth import AuthModule
 from .heartbeat import WebSocketClientApi, HeartbeatApi
@@ -38,6 +39,8 @@ class VKVideoApi(UserApi, StreamerApi, StreamersApi, WatchStreamMonitor):
 
         self.is_watch_drop_streamers = False
         self.drop_streamers: list[tuple[str, int]] = []
+
+        self.metrics_manager: MetricsManager | None = None
 
     @classmethod
     def start_auth(cls) -> "VKVideoApi":

@@ -1,0 +1,122 @@
+{
+  "default_labels": ["user_id", "hostname"],
+  "metrics": {
+    "vkbot_uptime_seconds": {
+      "type": "gauge",
+      "documentation": "Application uptime in seconds",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+
+    "vkapp_requests_all": {
+      "type": "counter",
+      "documentation": "Total number of application requests",
+      "additional_labels": []
+    },
+    "vkapp_requests_success": {
+      "type": "counter",
+      "documentation": "Total number of successful requests",
+      "additional_labels": []
+    },
+    "vkapp_requests_with_error": {
+      "type": "counter",
+      "documentation": "Total number of failed requests grouped by status code",
+      "additional_labels": ["code"]
+    },
+
+    "vkapp_wss_active": {
+      "type": "gauge",
+      "documentation": "WebSocket connection status (1 active, 0 inactive)",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_wss_requests": {
+      "type": "counter",
+      "documentation": "Total number of messages sent via WebSocket",
+      "additional_labels": []
+    },
+    "vkapp_wss_responses": {
+      "type": "counter",
+      "documentation": "Total number of messages received via WebSocket",
+      "additional_labels": []
+    },
+    "vkapp_wss_subscriptions_total": {
+      "type": "counter",
+      "documentation": "Total number of subscription events in WebSocket layer",
+      "additional_labels": []
+    },
+    "vkapp_wss_unsubscriptions_total": {
+      "type": "counter",
+      "documentation": "Total number of unsubscription events in WebSocket layer",
+      "additional_labels": []
+    },
+
+    "vkapp_streamers_all": {
+      "type": "gauge",
+      "documentation": "Current number of online streamers",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_streamers_heartbeat_active": {
+      "type": "gauge",
+      "documentation": "Current number of streamers with active heartbeat",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_streamers_heartbeat_lost_total": {
+      "type": "counter",
+      "documentation": "Total number of streamers that lost heartbeat",
+      "additional_labels": []
+    },
+
+    "vkapp_has_point_total": {
+      "type": "gauge",
+      "documentation": "",
+      "additional_labels": ["streamer_nickname"],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_get_point_on_start": {
+      "type": "counter",
+      "documentation": "",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+
+    "vkapp_memory_used_bytes": {
+      "type": "gauge",
+      "documentation": "Current memory usage in bytes",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_memory_used_max_bytes": {
+      "type": "gauge",
+      "documentation": "Maximum memory usage in bytes",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_cpu_used": {
+      "type": "gauge",
+      "documentation": "Maximum observed CPU usage percent since start",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_cpu_used_current": {
+      "type": "gauge",
+      "documentation": "Current CPU usage percent",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_thread_used": {
+      "type": "gauge",
+      "documentation": "Current number of active threads",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_connections": {
+      "type": "gauge",
+      "documentation": "",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    }
+  }
+}
