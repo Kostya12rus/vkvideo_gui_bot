@@ -6,7 +6,7 @@ from loguru import logger
 
 from app_vkvideo.models import init_db, Account
 from app_vkvideo.vkvideo_api import VKVideoApi
-from monitoring import MetricsManager
+from app_vkvideo.monitoring import MetricsManager
 
 
 def parse_args() -> argparse.Namespace:
