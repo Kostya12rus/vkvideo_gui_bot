@@ -1,5 +1,5 @@
 {
-  "default_labels": ["user_id", "hostname"],
+  "default_labels": ["user_id", "hostname", "client_id"],
   "metrics": {
     "vkbot_uptime_seconds": {
       "type": "gauge",
@@ -117,6 +117,12 @@
       "documentation": "",
       "additional_labels": [],
       "groups": ["start_with_zero"]
+    },
+    "vkapp_client_up": {
+      "type": "gauge",
+      "documentation": "Client process liveness (1 running, 0 stopping)",
+      "additional_labels": [],
+      "groups": ["start_with_zero", "end_with_zero"]
     }
   }
 }

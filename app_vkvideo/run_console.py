@@ -1,6 +1,7 @@
 import argparse
 import socket
 import time
+from typing import Any
 
 from loguru import logger
 
@@ -29,20 +30,25 @@ def parse_args() -> argparse.Namespace:
         help="Интервал фонового сбора ресурсных метрик в секундах (по умолчанию: 5.0)",
     )
     parser.add_argument(
+        "--metrics-client-id",
+        default=None,
+        help="Уникальный ID клиента для метрик (по умолчанию генерируется автоматически)",
+    )
+    parser.add_argument(
         "--is-debug",
-        type=bool,
-        default=False,
-        help="Дебаг режим",
+        action="store_true",
+        help="Включить дебаг режим WebSocket",
     )
     return parser.parse_args()
 
-def create_metrics(user_id: int|str) -> MetricsManager:
-    args = parse_args()
+
+def create_metrics(user_id: int | str, args: argparse.Namespace) -> Any:
     return MetricsManager(
         host=args.metrics_host,
         port=args.metrics_port,
         user_id=str(user_id),
         hostname=socket.gethostname(),
+        client_id=args.metrics_client_id,
         collect_interval=args.metrics_interval,
         autostart=True,
     )
@@ -73,7 +79,7 @@ def run():
         logger.info("Перед запуском бота обновляю авторизационные данные")
         new_user = new_user.refresh_auth()
 
-    new_user.metrics_manager = create_metrics(new_user.user_id)
+    new_user.metrics_manager = create_metrics(new_user.user_id, args)
 
     new_user.wss_api.is_debug = args.is_debug
     logger.info("Запускаю просмотр за стримерами на которые вы подписаны и сейчас онлайн")

@@ -39,7 +39,8 @@ class WatchStreamMonitor:
 
         self.heartbeat_streamers[streamer_nickname].is_run = False
         del self.heartbeat_streamers[streamer_nickname]
-        self.metrics_manager.inc_metric("vkapp_streamers_heartbeat_lost_total")
+        if self.metrics_manager:
+            self.metrics_manager.inc_metric("vkapp_streamers_heartbeat_lost_total")
 
 
     def start_watch_all_subscribers(self: TVKVideoApi) -> None:
@@ -202,13 +203,15 @@ class WatchStreamMonitor:
         return None
 
     def __inc_metric_streamers(self: TVKVideoApi) -> None:
-        self.metrics_manager.set_gauge("vkapp_streamers_all", float(len(self.heartbeat_streamers)))
+        if self.metrics_manager:
+            self.metrics_manager.set_gauge("vkapp_streamers_all", float(len(self.heartbeat_streamers)))
         active_streamers = [
             o
             for o in self.heartbeat_streamers.values()
             if o.is_run and o.streamer_is_online
         ]
-        self.metrics_manager.set_gauge("vkapp_streamers_heartbeat_active", float(len(active_streamers)))
+        if self.metrics_manager:
+            self.metrics_manager.set_gauge("vkapp_streamers_heartbeat_active", float(len(active_streamers)))
 
 
     def _initialize_callback(self: TVKVideoApi) -> None:
@@ -322,9 +325,12 @@ class WatchStreamMonitor:
             f"Изменение баланса {data.delta} ({old_balance} -> {data.balance}) "
             f"за {data.reason.bonus.name or data.reason.type}({data.reason.bonus.description})"
         )
-        if data.delta > 0:
-            self.metrics_manager.inc_metric("vkapp_get_point_on_start", float(data.delta))
-        self.metrics_manager.set_gauge("vkapp_has_point_total", float(data.balance), streamer_nickname=_streamer_nickname)
+        if self.metrics_manager:
+            if data.delta > 0:
+                self.metrics_manager.inc_metric("vkapp_get_point_on_start", float(data.delta))
+            self.metrics_manager.set_gauge(
+                "vkapp_has_point_total", float(data.balance), streamer_nickname=_streamer_nickname
+            )
 
     def __on_raid_status_channel_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: WssRaidStatusChannelInfo):
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)

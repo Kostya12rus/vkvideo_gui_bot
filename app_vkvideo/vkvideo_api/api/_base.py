@@ -91,13 +91,13 @@ class BaseApi:
             full_url = API_URL + url_path
 
         metrics_manager = getattr(self, "metrics_manager", None)
-        if metrics_manager is not None:
-            metrics_manager.inc_metric("vkapp_requests_all")
 
         with self.__request_semaphore:
             req: Optional[curl_cffi.Response] = None
             with curl_cffi.Session(**default_kwargs) as session:
                 for _ in range(MAX_RETRIES):
+                    if metrics_manager is not None:
+                        metrics_manager.inc_metric("vkapp_requests_all")
                     try:
                         req = session.request(method=method, url=full_url, timeout=MAX_TIMEOUT_IN_SECONDS, **kwargs)
                         break
