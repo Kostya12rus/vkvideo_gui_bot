@@ -33,7 +33,6 @@ class BaseMetricsManager:
         port: int,
         user_id: str,
         hostname: str | None = None,
-        client_id: str | None = None,
         job_name: str = "python_app",
         timeout_seconds: float = 1.5,
         config_path: str | Path | None = None,
@@ -49,13 +48,11 @@ class BaseMetricsManager:
 
         self.registry = CollectorRegistry()
         self.config = self._load_config(config_path)
-        self.default_labels = list(self.config.get("default_labels", ["user_id", "hostname", "client_id"]))
+        self.default_labels = list(self.config.get("default_labels", ["user_id", "hostname"]))
 
-        generated_client_id = f"{socket.gethostname()}-{os.getpid()}-{uuid.uuid4().hex[:8]}"
         self.base_labels = {
             "user_id": str(user_id),
             "hostname": str(hostname or socket.gethostname()),
-            "client_id": str(client_id or generated_client_id),
         }
         self.grouping_key = dict(self.base_labels)
 
@@ -100,14 +97,16 @@ class BaseMetricsManager:
         for sig in (signal.SIGINT, signal.SIGTERM):
             try:
                 signal.signal(sig, self._handle_exit_signal)
-            except Exception:
+            except Exception:  # noqa
                 continue
 
-    def _handle_exit_signal(self, signum, frame) -> None:  # noqa: ARG002
+    def _handle_exit_signal(self, signum, frame) -> None:  # noqa
         self.shutdown()
         raise SystemExit(0)
 
     def check_connection(self) -> bool:
+        if self.connected is not None:
+            return self.connected
         try:
             with socket.create_connection((self.host, self.port), timeout=self.timeout_seconds):
                 self.connected = True
@@ -122,7 +121,7 @@ class BaseMetricsManager:
 
         try:
             delete_from_gateway(self.pushgateway_url, job=self.job_name, grouping_key=self.grouping_key)
-        except Exception:
+        except Exception:  # noqa
             pass
 
         for metric_name, metric_info in self.metric_defs.items():
@@ -186,7 +185,7 @@ class BaseMetricsManager:
                 )
                 self._dirty = False
                 return True
-            except Exception:
+            except Exception:  # noqa
                 return False
 
     def _labels_for(self, metric_name: str, extra_labels: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -248,7 +247,7 @@ class BaseMetricsManager:
 
         try:
             delete_from_gateway(self.pushgateway_url, job=self.job_name, grouping_key=self.grouping_key)
-        except Exception:
+        except Exception:  # noqa
             pass
 
 
@@ -266,7 +265,6 @@ class MetricsManager(
         port: int,
         user_id: str,
         hostname: str | None = None,
-        client_id: str | None = None,
         job_name: str = "python_app",
         timeout_seconds: float = 1.5,
         config_path: str | Path | None = None,
@@ -278,7 +276,6 @@ class MetricsManager(
             port=port,
             user_id=user_id,
             hostname=hostname,
-            client_id=client_id,
             job_name=job_name,
             timeout_seconds=timeout_seconds,
             config_path=config_path,

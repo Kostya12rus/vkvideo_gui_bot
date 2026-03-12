@@ -72,3 +72,26 @@ class StreamersApi(BaseApi):
                 if drop_streamers.extra.is_last:
                     break
             return return_data
+
+    def get_catalog_streamers(self, catalog_id: str, limit: int = 20, offset: int = 0, load_all: bool = False) -> VkapiCatalogStreamers:
+        if not load_all:
+            req = self.request(STREAMERS_CATALOG_URL.format(catalog_id, limit, offset), "GET")
+            req_json = req.json()
+            req_class = VkapiCatalogStreamers(req_json)
+            self.callback.trigger(VKAPIEventName.CATALOG_STREAMERS, user_id=self.user_id, message=req_class)
+            return req_class
+        else:
+            return_data = None
+            limit = limit
+            offset = 0
+            while True:
+                catalog_streamers = self.get_catalog_streamers(catalog_id, limit, offset)
+                offset = catalog_streamers.extra.offset
+                if not return_data:
+                    return_data = catalog_streamers
+                else:
+                    return_data.data.stream_blogs.extend(catalog_streamers.data.stream_blogs)
+
+                if catalog_streamers.extra.is_last:
+                    break
+            return return_data

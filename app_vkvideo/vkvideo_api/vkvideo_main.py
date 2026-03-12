@@ -40,6 +40,10 @@ class VKVideoApi(UserApi, StreamerApi, StreamersApi, WatchStreamMonitor):
         self.is_watch_drop_streamers = False
         self.drop_streamers: list[tuple[str, int]] = []
 
+        self.is_watch_catalog_streamers = False
+        self.catalog_id: str = ""
+        self.catalog_streamers: list[tuple[str, int]] = []
+
         self.metrics_manager: MetricsManager | None = None
 
     @classmethod
@@ -59,3 +63,15 @@ class VKVideoApi(UserApi, StreamerApi, StreamersApi, WatchStreamMonitor):
         instance.__init__(user_id=-1, cookies=cookies)
         user_info = instance.current_user_info()
         return VKVideoApi(user_id=user_info['id'], cookies=cookies)
+
+    def inc_metric(self, metric_name: str, amount: float = 1.0, **labels: Any) -> bool:
+        if not hasattr(self, 'metrics_manager') or not self.metrics_manager:
+            return False
+
+        return self.metrics_manager.inc_metric(metric_name, amount, **labels)
+
+    def set_gauge(self, metric_name: str, value: float, **labels: Any) -> bool:
+        if not hasattr(self, 'metrics_manager') or not self.metrics_manager:
+            return False
+
+        return self.metrics_manager.set_gauge(metric_name, value, **labels)

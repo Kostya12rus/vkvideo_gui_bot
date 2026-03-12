@@ -30,14 +30,14 @@ def parse_args() -> argparse.Namespace:
         help="Интервал фонового сбора ресурсных метрик в секундах (по умолчанию: 5.0)",
     )
     parser.add_argument(
-        "--metrics-client-id",
-        default=None,
-        help="Уникальный ID клиента для метрик (по умолчанию генерируется автоматически)",
-    )
-    parser.add_argument(
         "--is-debug",
         action="store_true",
         help="Включить дебаг режим WebSocket",
+    )
+    parser.add_argument(
+        "--farm-catalog-id",
+        default="",
+        help='Просмотр стримеров в указанной категории (по умолчанию: "")',
     )
     return parser.parse_args()
 
@@ -48,7 +48,6 @@ def create_metrics(user_id: int | str, args: argparse.Namespace) -> Any:
         port=args.metrics_port,
         user_id=str(user_id),
         hostname=socket.gethostname(),
-        client_id=args.metrics_client_id,
         collect_interval=args.metrics_interval,
         autostart=True,
     )
@@ -86,6 +85,9 @@ def run():
     new_user.start_watch_online_subscribers()
     logger.info("Запускаю просмотр за стримерами у которые включена Бокс Компания")
     new_user.start_watch_drop_streamers()
+    if args.farm_catalog_id:
+        logger.info(f"Запускаю просмотр за стримерами из категории '{args.farm_catalog_id}'")
+        new_user.start_watch_catalog_streamers(args.farm_catalog_id)
 
     while True:
         time.sleep(1)

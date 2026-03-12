@@ -2,7 +2,7 @@ import json
 import random
 import threading
 from io import BytesIO
-from typing import Any, Unpack, Optional, Union, TypedDict
+from typing import Any, Unpack, Optional, Union, TypedDict, TYPE_CHECKING, TypeVar
 from urllib.parse import urlparse
 
 from curl_cffi.requests.exceptions import Timeout
@@ -13,6 +13,11 @@ from curl_cffi.requests.session import HttpMethod
 
 from app_vkvideo.utils import CallbackManager
 from ..config import *
+
+if TYPE_CHECKING:
+    from ..vkvideo_main import VKVideoApi  # noqa
+
+TVKVideoApi = TypeVar("TVKVideoApi", bound="VKVideoApi")
 
 
 class RequestParams(TypedDict, total=False):
@@ -34,22 +39,22 @@ class RequestParams(TypedDict, total=False):
 class BaseApi:
     callback = CallbackManager()
 
-    def __init__(self, user_id: int, cookies: list[dict[str, Any]]):
+    def __init__(self: TVKVideoApi, user_id: int, cookies: list[dict[str, Any]]):
         self.user_id = user_id
         self._cookies_list = cookies.copy()
         self.session = self._create_session()
         self.__request_semaphore = threading.Semaphore(MAX_REQUEST_IN_TIME)
 
     @property
-    def cookies(self) -> list[dict[str, Any]]:
+    def cookies(self: TVKVideoApi) -> list[dict[str, Any]]:
         return self._cookies_list
 
     @cookies.setter
-    def cookies(self, cookies: list[dict[str, Any]]) -> None:
+    def cookies(self: TVKVideoApi, cookies: list[dict[str, Any]]) -> None:
         self._cookies_list = cookies.copy()
         self.session = self._create_session()
 
-    def _create_session(self) -> curl_cffi.Session:
+    def _create_session(self: TVKVideoApi) -> curl_cffi.Session:
         session = curl_cffi.Session()
         session.default_headers = True
         session.impersonate = random.choice([imp.value for imp in curl_cffi.BrowserType])
@@ -68,7 +73,7 @@ class BaseApi:
 
         return session
 
-    def request(self, url_path: str, method: HttpMethod, **kwargs: Unpack[RequestParams]) -> curl_cffi.Response:
+    def request(self: TVKVideoApi, url_path: str, method: HttpMethod, **kwargs: Unpack[RequestParams]) -> curl_cffi.Response:
         if not self.session:
             self.session = self._create_session()
 
@@ -90,26 +95,17 @@ class BaseApi:
         if not urlparse(url_path).hostname:
             full_url = API_URL + url_path
 
-        metrics_manager = getattr(self, "metrics_manager", None)
-
         with self.__request_semaphore:
             req: Optional[curl_cffi.Response] = None
             with curl_cffi.Session(**default_kwargs) as session:
                 for _ in range(MAX_RETRIES):
-                    if metrics_manager is not None:
-                        metrics_manager.inc_metric("vkapp_requests_all")
+                    self.inc_metric("vkapp_requests_all")
                     try:
                         req = session.request(method=method, url=full_url, timeout=MAX_TIMEOUT_IN_SECONDS, **kwargs)
                         break
-                    except Timeout:
-                        logger.error(f"[Timeout] Источник не прислал ответ на запрос: {method}, {full_url}")
-                        if metrics_manager is not None:
-                            metrics_manager.inc_metric("vkapp_requests_with_error", code="timeout")
-                        continue
                     except Exception as e:
                         logger.error(f"[{e.__class__.__name__}] Источник не прислал ответ на запрос: {method}, {full_url}")
-                        if metrics_manager is not None:
-                            metrics_manager.inc_metric("vkapp_requests_with_error", code=e.__class__.__name__.lower())
+                        self.inc_metric("vkapp_requests_with_error", code=e.__class__.__name__.lower())
                         continue
 
                 if req is None:
@@ -117,10 +113,7 @@ class BaseApi:
 
                 if not req.ok:
                     logger.error(f"{method}, {req.status_code}, {req.elapsed}, {full_url}")
-                    if metrics_manager is not None:
-                        metrics_manager.inc_metric("vkapp_requests_with_error", code=str(req.status_code))
-                # else:
-                #     logger.debug(f"{method}, {req.status_code}, {req.elapsed}, {full_url}")
-                elif metrics_manager is not None:
-                    metrics_manager.inc_metric("vkapp_requests_success")
+                    self.inc_metric("vkapp_requests_with_error", code=str(req.status_code))
+                else:
+                    self.inc_metric("vkapp_requests_success")
                 return req

@@ -1,5 +1,5 @@
 {
-  "default_labels": ["user_id", "hostname", "client_id"],
+  "default_labels": ["user_id", "hostname"],
   "metrics": {
     "vkbot_uptime_seconds": {
       "type": "gauge",
@@ -11,17 +11,20 @@
     "vkapp_requests_all": {
       "type": "counter",
       "documentation": "Total number of application requests",
-      "additional_labels": []
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
     },
     "vkapp_requests_success": {
       "type": "counter",
       "documentation": "Total number of successful requests",
-      "additional_labels": []
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
     },
     "vkapp_requests_with_error": {
       "type": "counter",
       "documentation": "Total number of failed requests grouped by status code",
-      "additional_labels": ["code"]
+      "additional_labels": ["code"],
+      "groups": ["start_with_zero"]
     },
 
     "vkapp_wss_active": {
@@ -30,30 +33,52 @@
       "additional_labels": [],
       "groups": ["start_with_zero"]
     },
+    "vkapp_wss_streamers_all": {
+      "type": "gauge",
+      "documentation": "",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_wss_streamers_active": {
+      "type": "gauge",
+      "documentation": "",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
     "vkapp_wss_requests": {
       "type": "counter",
       "documentation": "Total number of messages sent via WebSocket",
-      "additional_labels": []
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
     },
     "vkapp_wss_responses": {
       "type": "counter",
       "documentation": "Total number of messages received via WebSocket",
-      "additional_labels": []
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
     },
     "vkapp_wss_subscriptions_total": {
       "type": "counter",
       "documentation": "Total number of subscription events in WebSocket layer",
-      "additional_labels": []
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
     },
     "vkapp_wss_unsubscriptions_total": {
       "type": "counter",
       "documentation": "Total number of unsubscription events in WebSocket layer",
-      "additional_labels": []
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_wss_message_type_response_total": {
+      "type": "counter",
+      "documentation": "",
+      "additional_labels": ["message_name"],
+      "groups": ["start_with_zero"]
     },
 
-    "vkapp_streamers_all": {
+    "vkapp_streamers_heartbeat_all": {
       "type": "gauge",
-      "documentation": "Current number of online streamers",
+      "documentation": "",
       "additional_labels": [],
       "groups": ["start_with_zero"]
     },
@@ -63,10 +88,17 @@
       "additional_labels": [],
       "groups": ["start_with_zero"]
     },
-    "vkapp_streamers_heartbeat_lost_total": {
+    "vkapp_streamers_heartbeat_subscription_total": {
       "type": "counter",
-      "documentation": "Total number of streamers that lost heartbeat",
-      "additional_labels": []
+      "documentation": "",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_streamers_heartbeat_unsubscriptions_total": {
+      "type": "counter",
+      "documentation": "",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
     },
 
     "vkapp_has_point_total": {

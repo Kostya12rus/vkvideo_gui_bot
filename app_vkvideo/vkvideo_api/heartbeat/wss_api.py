@@ -73,8 +73,7 @@ class WebSocketClientApi:
             origin=BASE_URL.rstrip("/")
         )
         logger.info(f"[{self.vk_api.user_id}]: Статус WSS соединения к VKLive: status={self.__wss.connected}")
-        if self.vk_api.metrics_manager:
-            self.vk_api.metrics_manager.set_gauge("vkapp_wss_active", 1.0 if self.__wss.connected else 0.0)
+        self.vk_api.set_gauge("vkapp_wss_active", 1.0 if self.__wss.connected else 0.0)
 
         self.__thread_stop_event.clear()
         self.__thread_read_message = threading.Thread(target=self._loop_read_message, daemon=True)
@@ -83,15 +82,13 @@ class WebSocketClientApi:
         self.__send_token()
         logger.info(f"[{self.vk_api.user_id}]: Авторизовался в WSS соединения к VKLive")
 
-
     def _close(self):
         if self.__wss:
             if self.__wss.connected:
                 logger.debug("Closing WebSocket...")
                 self.__wss.close()
             self.__wss = None
-        if self.vk_api.metrics_manager:
-            self.vk_api.metrics_manager.set_gauge("vkapp_wss_active", 0.0)
+        self.vk_api.set_gauge("vkapp_wss_active", 0.0)
 
         self.__thread_stop_event.set()
         if self.__thread_read_message and self.__thread_read_message.is_alive():
@@ -132,8 +129,7 @@ class WebSocketClientApi:
             f"[{self.vk_api.user_id}]: [{clear_streamer_nickname}] "
             f"Подписался на {len(streamer_wss_channels)} событий стримера"
         )
-        if self.vk_api.metrics_manager:
-            self.vk_api.metrics_manager.inc_metric("vkapp_wss_subscriptions_total")
+        self.vk_api.inc_metric("vkapp_wss_subscriptions_total")
 
     def unsubscribe_streamer(self, streamer_nickname: str = None):
         if not self.__is_run or not streamer_nickname:
@@ -159,13 +155,11 @@ class WebSocketClientApi:
             f"Отписался от {len(streamer_wss_channels)} событий стримера"
         )
         del self.streamer_subscribe[clear_streamer_nickname]
-        if self.vk_api.metrics_manager:
-            self.vk_api.metrics_manager.inc_metric("vkapp_wss_unsubscriptions_total")
+        self.vk_api.inc_metric("vkapp_wss_unsubscriptions_total")
 
 
     def _send_message(self, message: dict | list | str):
-        if self.vk_api.metrics_manager:
-            self.vk_api.metrics_manager.inc_metric("vkapp_wss_requests")
+        self.vk_api.inc_metric("vkapp_wss_requests")
         if isinstance(message, (dict, list)):
             message = json.dumps(message)
         elif isinstance(message, str):
@@ -214,28 +208,29 @@ class WebSocketClientApi:
                     logger.error(f"WSS Connection closed error receiving message.", exc_info=True)
                     break
         finally:
-            if self.vk_api.metrics_manager:
-                self.vk_api.metrics_manager.set_gauge("vkapp_wss_active", 0.0)
+            self.vk_api.set_gauge("vkapp_wss_active", 0.0)
             if self.__is_run and not self.__wss.connected:
                 self.__wss_token = ""
                 if self.__thread_stop_event.wait(random.randint(1, 5) + random.random()):
                     return
                 self._connect()
-                if self.streamers_inited:
-                    for message in self.streamers_inited.values():
-                        threading.Thread(target=self._send_message, args=(message,), daemon=True).start()
+                for message in self.streamers_inited.values():
+                    threading.Thread(target=self._send_message, args=(message,), daemon=True).start()
 
     def __thread_check_message(self, message: dict):
-        if self.vk_api.metrics_manager:
-            self.vk_api.metrics_manager.inc_metric("vkapp_wss_responses")
+        self.vk_api.set_gauge("vkapp_wss_streamers_all", float(len(self.streamer_subscribe)))
+        self.vk_api.set_gauge("vkapp_wss_streamers_active", float(len(self.streamers_inited)))
+        self.vk_api.inc_metric("vkapp_wss_responses")
 
         message_str = str(message)
         if "connect" in message_str and "client" in message_str and "version" in message_str and "expires" in message_str:
             logger.info(f"[{self.vk_api.user_id}]: Успешное соединение с WSS: {message=}")
+            self.vk_api.inc_metric("vkapp_wss_message_type_response_total", message_name="success_auth")
         # logger.debug(f"Message received: {message}")
 
         if message == {}:
             self._send_message({})
+            self.vk_api.inc_metric("vkapp_wss_message_type_response_total", message_name="ping")
             return
 
         self.__send_callback(message)
@@ -268,6 +263,7 @@ class WebSocketClientApi:
         channel_type, streamer_id, user_id = self.__get_message_type_info(message)
         if not channel_type or not streamer_id:
             return
+        self.vk_api.inc_metric("vkapp_wss_message_type_response_total", message_name=channel_type)
 
         self.__callback.trigger(WSSEventName.ON_MESSAGE, streamer_id=streamer_id, user_id=user_id, message=message)
 
@@ -355,6 +351,9 @@ class WebSocketClientApi:
         self.vk_api.callback.register(VKAPIEventName.STREAMER_STREAM_INFO, self.__on_streamer_stream_info)
 
     def __on_streamer_stream_info(self, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo):
+        if str(user_id) != str(self.vk_api.user_id):
+            return
+
         streamer_nickname = message.data.stream.embed_url.split("/")[-1]
         clear_streamer_nickname = str(streamer_nickname).lower()
         if clear_streamer_nickname not in self.streamer_subscribe:

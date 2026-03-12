@@ -5,6 +5,7 @@ MAX_TIMEOUT_IN_SECONDS = 30
 UPDATE_SUBSCRIPTIONS_LIST_INTERVAL = 600
 UPDATE_ONLINE_SUBSCRIPTIONS_LIST_INTERVAL = 60
 UPDATE_DROPS_LIST_INTERVAL = 600
+UPDATE_CATALOG_LIST_INTERVAL = 600
 
 BASE_URL = "https://live.vkvideo.ru/"
 API_URL = "https://api.live.vkvideo.ru/"
@@ -41,4 +42,5 @@ STREAMER_PENDING_BONUS_GATHER_URL = "v1/channel/{}/point/pending_bonus/{}/gather
 STREAMERS_ONLINE_SUBSCRIPTIONS_URL = "v1/%2Fuser%2Fpublic_video_stream%2Fsubscriptions%2Fonline%2F?limit={}&offset={}" #limit=50&offset=0
 STREAMERS_SUBSCRIPTIONS_URL = "v1/user/subscriptions?limit={}&offset={}&with_follow=true" #limit=30&offset=0
 STREAMERS_DROP_URL = "v1/catalog/public_video_streams/drops/?limit={}&offset={}" #limit=40&offset=0
+STREAMERS_CATALOG_URL = "v1/catalog/public_video_streams/category/{}/stream/?limit={}&offset={}" #limit=40&offset=0
 
