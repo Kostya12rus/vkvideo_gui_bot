@@ -113,6 +113,19 @@
       "additional_labels": [],
       "groups": ["start_with_zero"]
     },
+    "vkapp_get_point_type": {
+      "type": "counter",
+      "documentation": "",
+      "additional_labels": ["point_type"],
+      "groups": ["start_with_zero"]
+    },
+
+    "vkapp_drop_campaign_progress": {
+      "type": "gauge",
+      "documentation": "",
+      "additional_labels": ["external_id", "campaign_title"],
+      "groups": ["start_with_zero"]
+    },
 
     "vkapp_memory_used_bytes": {
       "type": "gauge",

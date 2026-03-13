@@ -35,6 +35,11 @@ def parse_args() -> argparse.Namespace:
         help="Включить дебаг режим WebSocket",
     )
     parser.add_argument(
+        "--disable-farm-drop-company",
+        action="store_true",
+        help='Не смотреть стримеров участвующих в Бокс-кампаниях',
+    )
+    parser.add_argument(
         "--farm-catalog-id",
         default="",
         help='Просмотр стримеров в указанной категории (по умолчанию: "")',
@@ -75,18 +80,19 @@ def run():
         account: Account = accounts[0]
         new_user = VKVideoApi(account.account_id, account.cookies_decrypted)
 
-        logger.info("Перед запуском бота обновляю авторизационные данные")
-        new_user = new_user.refresh_auth()
+        # logger.info("Перед запуском бота обновляю авторизационные данные")
+        # new_user = new_user.refresh_auth()
 
     new_user.metrics_manager = create_metrics(new_user.user_id, args)
 
     new_user.wss_api.is_debug = args.is_debug
-    logger.info("Запускаю просмотр за стримерами на которые вы подписаны и сейчас онлайн")
+    logger.info("Запускаю просмотр стримеров на которые подписан аккаунт и сейчас стримят")
     new_user.start_watch_online_subscribers()
-    logger.info("Запускаю просмотр за стримерами у которые включена Бокс Компания")
-    new_user.start_watch_drop_streamers()
+    if not args.disable_farm_drop_company:
+        logger.info("Запускаю просмотр стримеров у которые участвуют в Бокс-кампаниях")
+        new_user.start_watch_drop_streamers()
     if args.farm_catalog_id:
-        logger.info(f"Запускаю просмотр за стримерами из категории '{args.farm_catalog_id}'")
+        logger.info(f"Запускаю просмотр стримеров из категории '{args.farm_catalog_id}'")
         new_user.start_watch_catalog_streamers(args.farm_catalog_id)
 
     while True:

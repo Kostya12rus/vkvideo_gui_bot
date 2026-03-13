@@ -1,6 +1,7 @@
 import atexit
 import json
 import os
+import re
 import signal
 import socket
 import threading
@@ -225,6 +226,16 @@ class BaseMetricsManager:
         metric.inc(amount)
         self._dirty = True
         return True
+
+    @staticmethod
+    def clean_label_value_underscore(text: str) -> str:
+        """
+        Для использования в лейблах Prometheus (без пробелов).
+        """
+        text = text.lower()
+        text = re.sub(r'[^а-яА-ЯёЁa-zA-Z0-9]', ' ', text)
+        text = re.sub(r'\s+', '_', text)
+        return text.strip('_')
 
     def push_now(self) -> bool:
         return self._push_registry(force=True)

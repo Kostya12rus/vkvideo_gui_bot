@@ -42,6 +42,8 @@ from .stream_start_stream_slot import WssStreamStartStreamSlot
 
 class WSSEventName(Enum):
     ON_MESSAGE = "on_message"
+    ON_CONNECTED = "on_connected"
+    ON_DISCONNECTED = "on_disconnected"
     CHANNEL_STATE_CHANNEL_INFO = "channel_state_channel_info"
     CHANNEL_STREAM_CHANNEL_INFO = "channel_stream_channel_info"
     CHANNEL_STREAM_STREAM_SLOT = "channel_stream_stream_slot"
