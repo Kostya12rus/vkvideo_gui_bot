@@ -374,7 +374,7 @@ class WebSocketManager:
             self.vk_api.inc_metric("vkapp_wss_message_type_response_total", message_name="success_auth")
 
         if message == {}:
-            self._send_message("{}")
+            self.web_socket.send("{}")
             threading.Thread(target=self._check_all_subscribe_streamer, daemon=True).start()
             self.vk_api.inc_metric("vkapp_wss_message_type_response_total", message_name="ping")
             return
