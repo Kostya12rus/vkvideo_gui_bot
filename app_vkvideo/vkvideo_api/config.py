@@ -7,12 +7,14 @@ UPDATE_ONLINE_SUBSCRIPTIONS_LIST_INTERVAL = 60
 UPDATE_DROPS_LIST_INTERVAL = 300
 UPDATE_CATALOG_LIST_INTERVAL = 300
 
+WSS_REQUESTS_TIME_SLEEP = [0.1, 0.3]
+HTTP_REQUESTS_TIME_SLEEP = [0.1, 0.3]
+
 BASE_URL = "https://live.vkvideo.ru/"
 API_URL = "https://api.live.vkvideo.ru/"
 
 WSS_URL = "wss://pubsub.live.vkvideo.ru/connection/websocket?cf_protocol_version=v2"
 WSS_TYPE_MESSAGE_RE = r"(\w.*):(\d+)(?:@\d+)?(?:#(\d+))?"
-WSS_REQUESTS_TIME_SLEEP = [0.1, 0.2]
 
 USER_INFO_URL = "v8/actor"
 USER_CURRENT_URL = "v1/user/current"

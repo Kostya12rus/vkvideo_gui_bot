@@ -1,6 +1,7 @@
 import json
 import random
 import threading
+import time
 from io import BytesIO
 from typing import Any, Unpack, Optional, Union, TypedDict, TYPE_CHECKING, TypeVar
 from urllib.parse import urlparse
@@ -101,6 +102,9 @@ class BaseApi:
                 for _ in range(MAX_RETRIES):
                     self.inc_metric("vkapp_requests_all")
                     try:
+                        time_min, time_max = min(HTTP_REQUESTS_TIME_SLEEP), max(HTTP_REQUESTS_TIME_SLEEP)
+                        time.sleep(random.randint(time_min * 1000, time_max * 1000) / 1000)
+
                         req = session.request(method=method, url=full_url, timeout=MAX_TIMEOUT_IN_SECONDS, **kwargs)
                         break
                     except Exception as e:
