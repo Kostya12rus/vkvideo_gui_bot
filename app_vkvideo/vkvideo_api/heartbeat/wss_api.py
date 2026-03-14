@@ -75,7 +75,8 @@ class WebSocketManager:
                 if self.is_connected():
                     return
 
-                self.web_socket_req_id = 0
+                self._thread_stop_event.set()
+                self._web_socket_request_id = 0
 
                 web_socket_token = self._fetch_user_web_socket_token()
                 logger.info(f"[{self.vk_api.user_id}] WebSocket: Подключаюсь к VKLive")
@@ -86,36 +87,43 @@ class WebSocketManager:
                     f"[{self.user_id}] WebSocket: Статус соединения к VKLive: status={self.web_socket.connected}"
                 )
 
+                if self._thread_read_message and self._thread_read_message.is_alive():
+                    self._thread_read_message.join(timeout=10)
+
                 self._thread_stop_event.clear()
                 self._thread_read_message = threading.Thread(target=self._loop_read_message, daemon=True)
                 self._thread_read_message.start()
 
                 self._auth_user_web_socket_token(web_socket_token)
+                self.vk_api.set_gauge("vkapp_wss_active", 1)
         except Exception:  # noqa
             logger.exception(f"[{self.user_id}] WebSocket: Ошибка подключения.", exc_info=True)
         finally:
             if not self.is_connected():
-                self.disconnect(True)
+                self.disconnect(is_reconnect=True)
 
-    def disconnect(self, force: bool = False):
+    def disconnect(self, is_reconnect: bool = False):
         with self._lock_connect:
             self._web_socket_is_auth = False
+            self._thread_stop_event.set()
 
             if self.web_socket:
                 if self.web_socket.connected:
                     logger.info(f"[{self.user_id}]: Закрываю WebSocket соединение...")
                     self.web_socket.close(timeout=self._web_socket_timeout)
-                self.__wss = None
+                self.web_socket = None
 
-            self._thread_stop_event.set()
             if self._thread_read_message and self._thread_read_message.is_alive():
                 self._thread_read_message.join(timeout=10)
 
             self.streamer_nickname_active = set()
-            if not force:
+            if not is_reconnect:
                 self.streamer_nickname_subscribe = set()
 
             self.vk_api.callback.trigger(WSSEventName.ON_DISCONNECTED, user_id=self.user_id)
+            self.vk_api.set_gauge("vkapp_wss_active", 0)
+            if is_reconnect:
+                threading.Thread(target=self.connect, daemon=True).start()
 
     def subscribe_streamer(self, streamer_nickname: str, web_socket_channels: list | set | None):
         if not streamer_nickname:
@@ -298,7 +306,8 @@ class WebSocketManager:
                     logger.error(f"[{self.user_id}] WebSocket: Непредвиденная ошибка соединения.", exc_info=True)
                     break
         finally:
-            self.disconnect(force=True)
+            if not self._thread_stop_event.is_set():
+                self.disconnect(is_reconnect=True)
 
     @staticmethod
     def _decode_json_stream(stream):
@@ -463,7 +472,7 @@ class WebSocketClientApi:
         self.vk_api.callback.register(VKAPIEventName.ONLINE_SUBSCRIPTION_STREAMERS, self.__on_online_subscription_streamers)
         self.vk_api.callback.register(VKAPIEventName.DROP_STREAMERS, self.__on_drop_streamers)
         self.vk_api.callback.register(VKAPIEventName.CATALOG_STREAMERS, self.__on_catalog_streamers)
-        self.vk_api.callback.register(WSSEventName.ON_DISCONNECTED, self.__on_disconnected)
+        # self.vk_api.callback.register(WSSEventName.ON_DISCONNECTED, self.__on_disconnected)
 
     def __on_streamer_stream_info(self, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo):
         streamer_nickname = message.data.stream.embed_url.split("/")[-1]
@@ -507,7 +516,7 @@ class WebSocketClientApi:
                 continue
             self.wss_manager.update_web_socket_channels(streamer_nickname, all_ws_channels)
 
-    def __on_disconnected(self, user_id: int) -> None:
-        if not self.__is_run or str(user_id) != str(self.vk_api.user_id):
-            return
-        self.wss_manager.connect()
+    # def __on_disconnected(self, user_id: int) -> None:
+    #     if not self.__is_run or str(user_id) != str(self.vk_api.user_id):
+    #         return
+    #     self.wss_manager.connect()
