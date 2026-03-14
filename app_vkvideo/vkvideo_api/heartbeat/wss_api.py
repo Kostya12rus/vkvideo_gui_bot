@@ -12,7 +12,7 @@ from websocket import WebSocket
 from app_vkvideo.config import Config as MainConfig
 from .wss_class import *
 from ..api.api_class import *
-from ..config import WSS_URL, WSS_TYPE_MESSAGE_RE, BASE_URL
+from ..config import WSS_URL, WSS_TYPE_MESSAGE_RE, BASE_URL, WSS_REQUESTS_TIME_SLEEP
 
 if TYPE_CHECKING:
     from ..vkvideo_main import VKVideoApi
@@ -38,6 +38,7 @@ class WebSocketManager:
         self._web_socket_is_auth = False
 
         self._lock_connect = threading.Lock()
+        self._lock_send_message = threading.Lock()
         self._lock_subscribe = threading.Lock()
         self._thread_read_message: Optional[threading.Thread] = None
         self._thread_stop_event = threading.Event()
@@ -271,12 +272,10 @@ class WebSocketManager:
         add_list = self.streamer_nickname_subscribe - self.streamer_nickname_active
         for streamer_nickname in add_list:
             self._send_subscribe_message(streamer_nickname)
-            if self._thread_stop_event.wait(random.random()): return
 
         del_list = self.streamer_nickname_active - self.streamer_nickname_subscribe
         for streamer_nickname in del_list:
             self._send_unsubscribe_message(streamer_nickname)
-            if self._thread_stop_event.wait(random.random()): return
 
     def _fetch_user_web_socket_token(self):
         logger.info(f"[{self.user_id}] WebSocket: Получаю токен пользователя для WebSocket соединения...")
@@ -306,18 +305,23 @@ class WebSocketManager:
         return self._web_socket_request_id
 
     def _send_message(self, message: dict | list | str) -> bool:
-        self.vk_api.inc_metric("vkapp_wss_requests")
-        message = self.normalize_send_message(message)
-        if not message:
-            return False
-        if not self.is_connected():
-            return False
-        ws = self.web_socket
-        if not ws or not ws.connected:
-            return False
-        ws.send(message)
-        # logger.debug(f"[{self.user_id}] WebSocket: Отправил запрос: '{message=}'.")
-        return True
+        with self._lock_send_message:
+            time_min, time_max = min(WSS_REQUESTS_TIME_SLEEP), max(WSS_REQUESTS_TIME_SLEEP)
+            multiply = 1000
+            time.sleep(random.randint(time_min*multiply, time_max*multiply) / multiply)
+
+            self.vk_api.inc_metric("vkapp_wss_requests")
+            message = self.normalize_send_message(message)
+            if not message:
+                return False
+            if not self.is_connected():
+                return False
+            ws = self.web_socket
+            if not ws or not ws.connected:
+                return False
+            ws.send(message)
+            # logger.debug(f"[{self.user_id}] WebSocket: Отправил запрос: '{message=}'.")
+            return True
 
     def _loop_read_message(self):
         ws = self.web_socket
