@@ -103,25 +103,29 @@ class WebSocketManager:
                 self.disconnect(is_reconnect=True)
 
     def disconnect(self, is_reconnect: bool = False):
-        with self._lock_connect:
-            self._web_socket_is_auth = False
-            self._thread_stop_event.set()
+        try:
+            with self._lock_connect:
+                self._web_socket_is_auth = False
+                self._thread_stop_event.set()
 
-            if self.web_socket:
-                if self.web_socket.connected:
-                    logger.info(f"[{self.user_id}]: Закрываю WebSocket соединение...")
-                    self.web_socket.close(timeout=self._web_socket_timeout)
-                self.web_socket = None
+                if self.web_socket:
+                    if self.web_socket.connected:
+                        logger.info(f"[{self.user_id}]: Закрываю WebSocket соединение...")
+                        self.web_socket.close(timeout=self._web_socket_timeout)
+                    self.web_socket = None
 
-            if self._thread_read_message and self._thread_read_message.is_alive():
-                self._thread_read_message.join(timeout=10)
+                if self._thread_read_message and self._thread_read_message.is_alive():
+                    self._thread_read_message.join(timeout=10)
 
-            self.streamer_nickname_active = set()
-            if not is_reconnect:
-                self.streamer_nickname_subscribe = set()
+                self.streamer_nickname_active = set()
+                if not is_reconnect:
+                    self.streamer_nickname_subscribe = set()
 
-            self.vk_api.callback.trigger(WSSEventName.ON_DISCONNECTED, user_id=self.user_id)
-            self.vk_api.set_gauge("vkapp_wss_active", 0)
+                self.vk_api.callback.trigger(WSSEventName.ON_DISCONNECTED, user_id=self.user_id)
+                self.vk_api.set_gauge("vkapp_wss_active", 0)
+        except Exception:  # noqa
+            logger.exception(f"[{self.user_id}] WebSocket: Ошибка отключения.", exc_info=True)
+        finally:
             if is_reconnect:
                 threading.Thread(target=self.connect, daemon=True).start()
 
