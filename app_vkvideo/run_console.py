@@ -81,7 +81,7 @@ def run():
         new_user = VKVideoApi(account.account_id, account.cookies_decrypted)
 
         logger.info("Перед запуском бота обновляю авторизационные данные")
-        # new_user = new_user.refresh_auth()
+        new_user = new_user.refresh_auth()
 
     new_user.metrics_manager = create_metrics(new_user.user_id, args)
 
