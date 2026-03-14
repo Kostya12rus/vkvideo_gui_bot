@@ -19,7 +19,7 @@ class AuthModule:
 
     def refresh_from_selenium(self, cookies: list[dict[str, Any]]) -> list[dict[str, Any]]:
         kwargs = self._get_default_selenium_kwargs()
-        kwargs["headless2"] = False
+        kwargs["headless2"] = True
         with SB(**kwargs) as sb:
             sb.open_url(BASE_URL)
             sb.add_cookies(cookies)
