@@ -1,6 +1,8 @@
 import json
+import random
 import re
 import threading
+import time
 from typing import TYPE_CHECKING, Optional, Tuple
 
 import websocket
@@ -39,6 +41,8 @@ class WebSocketManager:
         self._lock_subscribe = threading.Lock()
         self._thread_read_message: Optional[threading.Thread] = None
         self._thread_stop_event = threading.Event()
+        self._reconnect_attempt = 0
+        self._reconnect_scheduled = False
 
     @classmethod
     def get_or_create_wss_manager(cls, vk_api: "VKVideoApi") -> Optional["WebSocketManager"]:
@@ -88,7 +92,8 @@ class WebSocketManager:
                 )
 
                 if self._thread_read_message and self._thread_read_message.is_alive():
-                    self._thread_read_message.join(timeout=10)
+                    if self._thread_read_message != threading.current_thread():
+                        self._thread_read_message.join(timeout=10)
 
                 self._thread_stop_event.clear()
                 self._thread_read_message = threading.Thread(target=self._loop_read_message, daemon=True)
@@ -96,6 +101,7 @@ class WebSocketManager:
 
                 self._auth_user_web_socket_token(web_socket_token)
                 self.vk_api.set_gauge("vkapp_wss_active", 1)
+                self._reconnect_attempt = 0
         except Exception:  # noqa
             logger.exception(f"[{self.user_id}] WebSocket: Ошибка подключения.", exc_info=True)
         finally:
@@ -115,7 +121,8 @@ class WebSocketManager:
                     self.web_socket = None
 
                 if self._thread_read_message and self._thread_read_message.is_alive():
-                    self._thread_read_message.join(timeout=10)
+                    if self._thread_read_message != threading.current_thread():
+                        self._thread_read_message.join(timeout=10)
 
                 self.streamer_nickname_active = set()
                 if not is_reconnect:
@@ -127,7 +134,22 @@ class WebSocketManager:
             logger.exception(f"[{self.user_id}] WebSocket: Ошибка отключения.", exc_info=True)
         finally:
             if is_reconnect:
-                threading.Thread(target=self.connect, daemon=True).start()
+                threading.Thread(target=self._schedule_reconnect, daemon=True).start()
+
+    def _schedule_reconnect(self):
+        if self._reconnect_scheduled:
+            return
+        self._reconnect_scheduled = True
+        self._reconnect_attempt += 1
+        delay = min(30.0, (2 ** min(self._reconnect_attempt, 5)) + random.random())
+        logger.info(f"[{self.user_id}] WebSocket: Переподключение через {delay:.1f}s (attempt={self._reconnect_attempt})")
+        time.sleep(delay)
+        self._reconnect_scheduled = False
+
+        wss_api = getattr(self.vk_api, "wss_api", None)
+        if wss_api is not None and not wss_api.is_run:
+            return
+        self.connect()
 
     def subscribe_streamer(self, streamer_nickname: str, web_socket_channels: list | set | None):
         if not streamer_nickname:
@@ -226,17 +248,17 @@ class WebSocketManager:
         is_active = clear_streamer_nickname in self.streamer_nickname_active
         is_subscribe = clear_streamer_nickname in self.streamer_nickname_subscribe
 
-        if web_socket_channels:
-            if isinstance(web_socket_channels, list):
-                web_socket_channels = set(web_socket_channels)
-            if clear_streamer_nickname not in self.streamer_web_socket_channels:
-                self.streamer_web_socket_channels[clear_streamer_nickname] = web_socket_channels
-            elif len(web_socket_channels) > len(self.streamer_web_socket_channels):
-                if is_active or is_subscribe:
-                    self._send_unsubscribe_message(clear_streamer_nickname)
-                    self.streamer_web_socket_channels[clear_streamer_nickname] = web_socket_channels
-                    self._send_subscribe_message(streamer_nickname)
-                    return
+        if isinstance(web_socket_channels, list):
+            web_socket_channels = set(web_socket_channels)
+        old_channels = self.streamer_web_socket_channels.get(clear_streamer_nickname)
+        self.streamer_web_socket_channels[clear_streamer_nickname] = web_socket_channels
+
+        if old_channels is not None and old_channels != web_socket_channels and (is_active or is_subscribe):
+            self.streamer_web_socket_channels[clear_streamer_nickname] = old_channels
+            self._send_unsubscribe_message(clear_streamer_nickname)
+            self.streamer_web_socket_channels[clear_streamer_nickname] = web_socket_channels
+            self._send_subscribe_message(clear_streamer_nickname)
+            return
 
         if is_active or not is_subscribe:
             return
@@ -271,7 +293,10 @@ class WebSocketManager:
             },
             "id": self._generate_request_id()
         }
-        self.web_socket.send(self.normalize_send_message(message))
+        ws = self.web_socket
+        if not ws or not ws.connected:
+            raise RuntimeError("WebSocket не готов к авторизации")
+        ws.send(self.normalize_send_message(message))
         logger.info(f"[{self.user_id}] WebSocket: Отправил запрос на авторизацию в VKLive")
 
     def _generate_request_id(self) -> int:
@@ -285,19 +310,24 @@ class WebSocketManager:
             return False
         if not self.is_connected():
             return False
-
-        self.web_socket.send(message)
+        ws = self.web_socket
+        if not ws or not ws.connected:
+            return False
+        ws.send(message)
         # logger.debug(f"[{self.user_id}] WebSocket: Отправил запрос: '{message=}'.")
         return True
 
     def _loop_read_message(self):
+        ws = self.web_socket
+        if not ws:
+            return
         try:
-            while self.web_socket.connected:
+            while ws.connected:
                 try:
                     if not self.is_connected():
                         break
 
-                    message_str = self.web_socket.recv()
+                    message_str = ws.recv()
                     if message_str is None:
                         logger.error(f"[{self.user_id}] WebSocket: VKLive закрыл соединение.")
                         break
@@ -320,7 +350,7 @@ class WebSocketManager:
                     break
         finally:
             if not self._thread_stop_event.is_set():
-                self.disconnect(is_reconnect=True)
+                threading.Thread(target=self.disconnect, kwargs={"is_reconnect": True}).start()
 
     @staticmethod
     def _decode_json_stream(stream):
@@ -344,7 +374,7 @@ class WebSocketManager:
             self.vk_api.inc_metric("vkapp_wss_message_type_response_total", message_name="success_auth")
 
         if message == {}:
-            self.web_socket.send("{}")
+            self._send_message("{}")
             threading.Thread(target=self._check_all_subscribe_streamer, daemon=True).start()
             self.vk_api.inc_metric("vkapp_wss_message_type_response_total", message_name="ping")
             return
@@ -449,20 +479,21 @@ class WebSocketClientApi:
             return
         self.__is_run = is_run
 
+        if not self.wss_manager: return
         if self.__is_run:
             self.wss_manager.connect()
         else:
             self.wss_manager.disconnect()
 
     def subscribe_streamer(self, streamer_nickname: str, web_socket_channels: list | set | None = None):
-        if not streamer_nickname:
-            return
+        if not streamer_nickname: return
         self.is_run = True
+        if not self.wss_manager: return
         self.wss_manager.subscribe_streamer(streamer_nickname, web_socket_channels)
 
     def unsubscribe_streamer(self, streamer_nickname: str):
-        if not streamer_nickname:
-            return
+        if not streamer_nickname: return
+        if not self.wss_manager: return
         self.wss_manager.unsubscribe_streamer(streamer_nickname)
 
     @staticmethod
@@ -488,48 +519,47 @@ class WebSocketClientApi:
         # self.vk_api.callback.register(WSSEventName.ON_DISCONNECTED, self.__on_disconnected)
 
     def __on_streamer_stream_info(self, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo):
+        if not self.wss_manager: return
+        if str(user_id) != str(self.vk_api.user_id): return
         streamer_nickname = message.data.stream.embed_url.split("/")[-1]
         _streamer_id = message.data.stream.user.id
         _data_dict = message.data.stream._data_json
         all_ws_channels = self.generate_web_socket_channel_from_dict(_data_dict, streamer_id=_streamer_id)
-        if not all_ws_channels:
-            return
+        if not all_ws_channels: return
         self.wss_manager.update_web_socket_channels(streamer_nickname, all_ws_channels)
 
     def __on_online_subscription_streamers(self, user_id: int, message: VkapiOnlineSubscriptionStreamers):
+        if not self.wss_manager: return
+        if str(user_id) != str(self.vk_api.user_id): return
         for stream_blog in message.data.stream_blogs:
             stream_json = stream_blog.stream._data_json
             streamer_id = stream_blog.blog.owner.id
             streamer_nickname = stream_blog.blog.blog_url
             all_ws_channels = self.generate_web_socket_channel_from_dict(stream_json, streamer_id=streamer_id)
 
-            if not all_ws_channels:
-                continue
+            if not all_ws_channels: continue
             self.wss_manager.update_web_socket_channels(streamer_nickname, all_ws_channels)
 
     def __on_drop_streamers(self, user_id: int, message: VkapiDropStreamers):
+        if not self.wss_manager: return
+        if str(user_id) != str(self.vk_api.user_id): return
         for stream_blog in message.data.stream_blogs:
             stream_json = stream_blog.stream._data_json
             streamer_id = stream_blog.blog.owner.id
             streamer_nickname = stream_blog.blog.blog_url
             all_ws_channels = self.generate_web_socket_channel_from_dict(stream_json, streamer_id=streamer_id)
 
-            if not all_ws_channels:
-                continue
+            if not all_ws_channels: continue
             self.wss_manager.update_web_socket_channels(streamer_nickname, all_ws_channels)
 
     def __on_catalog_streamers(self, user_id: int, message: VkapiCatalogStreamers):
+        if not self.wss_manager: return
+        if str(user_id) != str(self.vk_api.user_id): return
         for stream_blog in message.data.stream_blogs:
             stream_json = stream_blog.stream._data_json
             streamer_id = stream_blog.blog.owner.id
             streamer_nickname = stream_blog.blog.blog_url
             all_ws_channels = self.generate_web_socket_channel_from_dict(stream_json, streamer_id=streamer_id)
 
-            if not all_ws_channels:
-                continue
+            if not all_ws_channels: continue
             self.wss_manager.update_web_socket_channels(streamer_nickname, all_ws_channels)
-
-    # def __on_disconnected(self, user_id: int) -> None:
-    #     if not self.__is_run or str(user_id) != str(self.vk_api.user_id):
-    #         return
-    #     self.wss_manager.connect()
