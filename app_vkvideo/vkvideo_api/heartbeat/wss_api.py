@@ -253,7 +253,7 @@ class WebSocketManager:
         old_channels = self.streamer_web_socket_channels.get(clear_streamer_nickname)
         self.streamer_web_socket_channels[clear_streamer_nickname] = web_socket_channels
 
-        if old_channels is not None and old_channels != web_socket_channels and (is_active or is_subscribe):
+        if old_channels is not None and old_channels < web_socket_channels and (is_active or is_subscribe):
             self.streamer_web_socket_channels[clear_streamer_nickname] = old_channels
             self._send_unsubscribe_message(clear_streamer_nickname)
             self.streamer_web_socket_channels[clear_streamer_nickname] = web_socket_channels
@@ -271,10 +271,12 @@ class WebSocketManager:
         add_list = self.streamer_nickname_subscribe - self.streamer_nickname_active
         for streamer_nickname in add_list:
             self._send_subscribe_message(streamer_nickname)
+            if self._thread_stop_event.wait(random.random()): return
 
         del_list = self.streamer_nickname_active - self.streamer_nickname_subscribe
         for streamer_nickname in del_list:
             self._send_unsubscribe_message(streamer_nickname)
+            if self._thread_stop_event.wait(random.random()): return
 
     def _fetch_user_web_socket_token(self):
         logger.info(f"[{self.user_id}] WebSocket: Получаю токен пользователя для WebSocket соединения...")
