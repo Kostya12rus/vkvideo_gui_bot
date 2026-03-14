@@ -222,14 +222,23 @@ class WebSocketManager:
             return
 
         clear_streamer_nickname = str(streamer_nickname).lower()
-        if web_socket_channels and clear_streamer_nickname not in self.streamer_web_socket_channels:
+
+        is_active = clear_streamer_nickname in self.streamer_nickname_active
+        is_subscribe = clear_streamer_nickname in self.streamer_nickname_subscribe
+
+        if web_socket_channels:
             if isinstance(web_socket_channels, list):
                 web_socket_channels = set(web_socket_channels)
-            self.streamer_web_socket_channels[clear_streamer_nickname] = web_socket_channels
+            if clear_streamer_nickname not in self.streamer_web_socket_channels:
+                self.streamer_web_socket_channels[clear_streamer_nickname] = web_socket_channels
+            elif len(web_socket_channels) > len(self.streamer_web_socket_channels):
+                if is_active or is_subscribe:
+                    self._send_unsubscribe_message(clear_streamer_nickname)
+                    self.streamer_web_socket_channels[clear_streamer_nickname] = web_socket_channels
+                    self._send_subscribe_message(streamer_nickname)
+                    return
 
-        if clear_streamer_nickname in self.streamer_nickname_active:
-            return
-        if clear_streamer_nickname not in self.streamer_nickname_subscribe:
+        if is_active or not is_subscribe:
             return
         self._send_subscribe_message(streamer_nickname)
 
