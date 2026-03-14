@@ -103,7 +103,7 @@ class BaseApi:
                     self.inc_metric("vkapp_requests_all")
                     try:
                         time_min, time_max = min(HTTP_REQUESTS_TIME_SLEEP), max(HTTP_REQUESTS_TIME_SLEEP)
-                        time.sleep(random.randint(time_min * 1000, time_max * 1000) / 1000)
+                        time.sleep(random.randint(int(time_min * 10000), int(time_max * 10000)) / 10000)
 
                         req = session.request(method=method, url=full_url, timeout=MAX_TIMEOUT_IN_SECONDS, **kwargs)
                         break

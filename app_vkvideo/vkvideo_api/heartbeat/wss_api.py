@@ -294,10 +294,7 @@ class WebSocketManager:
             },
             "id": self._generate_request_id()
         }
-        ws = self.web_socket
-        if not ws or not ws.connected:
-            raise RuntimeError("WebSocket не готов к авторизации")
-        ws.send(self.normalize_send_message(message))
+        self.web_socket.send(self.normalize_send_message(message))
         logger.info(f"[{self.user_id}] WebSocket: Отправил запрос на авторизацию в VKLive")
 
     def _generate_request_id(self) -> int:
@@ -307,8 +304,7 @@ class WebSocketManager:
     def _send_message(self, message: dict | list | str) -> bool:
         with self._lock_send_message:
             time_min, time_max = min(WSS_REQUESTS_TIME_SLEEP), max(WSS_REQUESTS_TIME_SLEEP)
-            multiply = 1000
-            time.sleep(random.randint(time_min*multiply, time_max*multiply) / multiply)
+            time.sleep(random.randint(int(time_min * 10000), int(time_max * 10000)) / 10000)
 
             self.vk_api.inc_metric("vkapp_wss_requests")
             message = self.normalize_send_message(message)
@@ -324,23 +320,21 @@ class WebSocketManager:
             return True
 
     def _loop_read_message(self):
-        ws = self.web_socket
-        if not ws:
-            return
         try:
-            while ws.connected:
+            while self.web_socket and self.web_socket.connected:
                 try:
                     if not self.is_connected():
                         break
 
-                    message_str = ws.recv()
+                    message_str = self.web_socket.recv()
                     if message_str is None:
                         logger.error(f"[{self.user_id}] WebSocket: VKLive закрыл соединение.")
                         break
 
                     try:
                         for message_dict in self._decode_json_stream(message_str):
-                            threading.Thread(target=self._check_message, args=(message_dict,), daemon=True).start()
+                            self._check_message(message_dict)
+                            # threading.Thread(target=self._check_message, args=(message_dict,), daemon=True).start()
                     except:  # noqa
                         logger.error(
                             f"[{self.user_id}] WebSocket: Пришло нестандартное сообщение '{message_str=}'",
