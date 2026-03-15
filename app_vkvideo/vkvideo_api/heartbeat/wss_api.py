@@ -312,10 +312,7 @@ class WebSocketManager:
                 return False
             if not self.is_connected():
                 return False
-            ws = self.web_socket
-            if not ws or not ws.connected:
-                return False
-            ws.send(message)
+            self.web_socket.send(message)
             # logger.debug(f"[{self.user_id}] WebSocket: Отправил запрос: '{message=}'.")
             return True
 
@@ -333,8 +330,8 @@ class WebSocketManager:
 
                     try:
                         for message_dict in self._decode_json_stream(message_str):
-                            self._check_message(message_dict)
-                            # threading.Thread(target=self._check_message, args=(message_dict,), daemon=True).start()
+                            # self._check_message(message_dict)
+                            threading.Thread(target=self._check_message, args=(message_dict,), daemon=True).start()
                     except:  # noqa
                         logger.error(
                             f"[{self.user_id}] WebSocket: Пришло нестандартное сообщение '{message_str=}'",
