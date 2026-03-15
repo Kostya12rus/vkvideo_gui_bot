@@ -514,9 +514,7 @@ class WebSocketClientApi:
         self.__init_callback = True
         self.vk_api.callback.register(VKAPIEventName.STREAMER_STREAM_INFO, self.__on_streamer_stream_info)
         self.vk_api.callback.register(VKAPIEventName.ONLINE_SUBSCRIPTION_STREAMERS, self.__on_online_subscription_streamers)
-        self.vk_api.callback.register(VKAPIEventName.DROP_STREAMERS, self.__on_drop_streamers)
         self.vk_api.callback.register(VKAPIEventName.CATALOG_STREAMERS, self.__on_catalog_streamers)
-        # self.vk_api.callback.register(WSSEventName.ON_DISCONNECTED, self.__on_disconnected)
 
     def __on_streamer_stream_info(self, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo):
         if not self.wss_manager: return
@@ -529,18 +527,6 @@ class WebSocketClientApi:
         self.wss_manager.update_web_socket_channels(streamer_nickname, all_ws_channels)
 
     def __on_online_subscription_streamers(self, user_id: int, message: VkapiOnlineSubscriptionStreamers):
-        if not self.wss_manager: return
-        if str(user_id) != str(self.vk_api.user_id): return
-        for stream_blog in message.data.stream_blogs:
-            stream_json = stream_blog.stream._data_json
-            streamer_id = stream_blog.blog.owner.id
-            streamer_nickname = stream_blog.blog.blog_url
-            all_ws_channels = self.generate_web_socket_channel_from_dict(stream_json, streamer_id=streamer_id)
-
-            if not all_ws_channels: continue
-            self.wss_manager.update_web_socket_channels(streamer_nickname, all_ws_channels)
-
-    def __on_drop_streamers(self, user_id: int, message: VkapiDropStreamers):
         if not self.wss_manager: return
         if str(user_id) != str(self.vk_api.user_id): return
         for stream_blog in message.data.stream_blogs:
