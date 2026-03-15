@@ -55,11 +55,11 @@ class CallbackManager:
             self._ref_to_event = {}  # {ref: (event_name, weakref)}
             self._initialized = True  # Флаг, что init уже выполнен
 
-    def _make_weakref(self, event_name: Union[EventName, str], callback: Callable) -> Callable:
+    def _make_weakref(self, event_name: Union[EventName, str, Any], callback: Callable) -> Callable:
         """Создаёт weakref и регистрирует автоудаление
 
         Args:
-            event_name (Union[EventName, str]): Название события.
+            event_name (Union[EventName, str, Any]): Название события.
             callback (Callable): Функция, которую нужно удалить.
         """
         if isinstance(callback, MethodType):
@@ -86,11 +86,11 @@ class CallbackManager:
                 if not self._callbacks[event_name]:
                     del self._callbacks[event_name]
 
-    def register(self, event_name: Union[EventName, str], callback: Callable) -> None:
+    def register(self, event_name: Union[EventName, str, Any], callback: Callable) -> None:
         """Регистрирует колбэк на событие.
 
         Args:
-            event_name (Union[EventName, str]): Название события.
+            event_name (Union[EventName, str, Any]): Название события.
             callback (Callable): Функция, вызываемая при возникновении события.
         """
         with self._lock:
@@ -99,11 +99,11 @@ class CallbackManager:
             if ref not in self._callbacks[event_name]:
                 self._callbacks[event_name].append(ref)
 
-    def unregister(self, event_name: Union[EventName, str], callback: Callable) -> None:
+    def unregister(self, event_name: Union[EventName, str, Any], callback: Callable) -> None:
         """Удаляет зарегистрированный колбэк с события.
 
         Args:
-            event_name (Union[EventName, str]): Название события.
+            event_name (Union[EventName, str, Any]): Название события.
             callback (Callable): Функция, которую нужно удалить.
         """
         with self._lock:
@@ -113,11 +113,11 @@ class CallbackManager:
                 if not self._callbacks[event_name]:
                     del self._callbacks[event_name]
 
-    def trigger(self, event_name: Union[EventName, str], *args, **kwargs) -> None:
+    def trigger(self, event_name: Union[EventName, str, Any], *args, **kwargs) -> None:
         """Вызывает все зарегистрированные колбэки для события в отдельных потоках.
 
         Args:
-            event_name (Union[EventName, str]): Название события.
+            event_name (Union[EventName, str, Any]): Название события.
             *args: Позиционные аргументы, передаваемые в колбэк.
             **kwargs: Именованные аргументы, передаваемые в колбэк.
         """
@@ -169,11 +169,11 @@ class CallbackManager:
         except Exception:  # noqa
             logger.exception(f"[async] Ошибка при вызове callback: {callback}")
 
-    def get_registered_callbacks(self, event_name: Union[EventName, str]) -> list[str]:
+    def get_registered_callbacks(self, event_name: Union[EventName, str, Any]) -> list[str]:
         """Возвращает список строковых представлений зарегистрированных колбэков (для отладки)
 
         Args:
-            event_name (Union[EventName, str]): Название события
+            event_name (Union[EventName, str, Any]): Название события
 
         Returns:
             list[str]: Список строковых представлений

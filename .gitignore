@@ -186,6 +186,7 @@ storage/
 
 # Grafana
 /monitoring/
+script_testing/
 grafana/
 
 # Prompts
