@@ -100,7 +100,7 @@ class BaseApi:
             req: Optional[curl_cffi.Response] = None
             with curl_cffi.Session(**default_kwargs) as session:
                 for _ in range(MAX_RETRIES):
-                    self.inc_metric("vkapp_requests_all")
+                    req = None
                     try:
                         time_min, time_max = min(HTTP_REQUESTS_TIME_SLEEP), max(HTTP_REQUESTS_TIME_SLEEP)
                         time.sleep(random.randint(int(time_min * 10000), int(time_max * 10000)) / 10000)
@@ -111,13 +111,18 @@ class BaseApi:
                         logger.error(f"[{e.__class__.__name__}] Источник не прислал ответ на запрос: {method}, {full_url}")
                         self.inc_metric("vkapp_requests_with_error", code=e.__class__.__name__.lower())
                         continue
+                    finally:
+                        self.inc_metric("vkapp_requests_all")
+                        if req is not None:
+                            if req.ok:
+                                self.inc_metric("vkapp_requests_success")
+                            else:
+                                self.inc_metric("vkapp_requests_with_error", code=str(req.status_code))
+                                logger.error(f"{method}, {req.status_code}, {req.elapsed}, {full_url}")
+                        else:
+                            logger.error(f"{method}, {full_url}")
 
                 if req is None:
                     raise RuntimeError(f"Request failed after retries: {method} {full_url}")
 
-                if not req.ok:
-                    logger.error(f"{method}, {req.status_code}, {req.elapsed}, {full_url}")
-                    self.inc_metric("vkapp_requests_with_error", code=str(req.status_code))
-                else:
-                    self.inc_metric("vkapp_requests_success")
                 return req
