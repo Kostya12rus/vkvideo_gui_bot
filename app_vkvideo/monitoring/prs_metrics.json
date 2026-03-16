@@ -33,6 +33,12 @@
       "additional_labels": [],
       "groups": ["start_with_zero"]
     },
+    "vkapp_wss_clients_active": {
+      "type": "gauge",
+      "documentation": "Current number of active WebSocket clients",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
     "vkapp_wss_streamers_all": {
       "type": "gauge",
       "documentation": "",

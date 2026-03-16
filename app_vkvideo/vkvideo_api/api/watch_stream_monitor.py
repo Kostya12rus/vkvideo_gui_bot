@@ -8,7 +8,7 @@ from loguru import logger
 from .api_class import *
 from ..config import *
 from ..heartbeat import HeartbeatApi
-from ..heartbeat.wss_class import *
+from ..web_socket.web_socket_model import *
 
 if TYPE_CHECKING:
     from ..vkvideo_main import VKVideoApi  # noqa
@@ -22,8 +22,8 @@ class WatchStreamMonitor:
         if streamer_nickname in self.heartbeat_streamers:
             return
 
-        self.wss_api.is_run = True
-        self.wss_api.subscribe_streamer(streamer_nickname=streamer_nickname)
+        self.web_socket_api.is_run = True
+        self.web_socket_api.subscribe_streamer(streamer_nickname=streamer_nickname)
 
         self.heartbeat_streamers[streamer_nickname] = HeartbeatApi(vk_api=self, streamer_nickname=streamer_nickname)
         self.heartbeat_streamers[streamer_nickname].is_run = True
@@ -34,7 +34,7 @@ class WatchStreamMonitor:
         if streamer_nickname not in self.heartbeat_streamers:
             return
 
-        self.wss_api.unsubscribe_streamer(streamer_nickname=streamer_nickname)
+        self.web_socket_api.unsubscribe_streamer(streamer_nickname=streamer_nickname)
 
         self.heartbeat_streamers[streamer_nickname].is_run = False
         del self.heartbeat_streamers[streamer_nickname]
@@ -269,12 +269,12 @@ class WatchStreamMonitor:
         self.callback.register(VKAPIEventName.STREAMER_PENDING_BONUS, self.__on_streamer_pending_bonus)
         self.callback.register(VKAPIEventName.STREAMER_STREAM_INFO, self.__on_streamer_stream_info)
 
-        self.callback.register(WSSEventName.DROP_CAMPAIGN_PROGRESS_CHANNEL_INFO, self.__on_drop_campaign_progress)
-        self.callback.register(WSSEventName.CP_BONUS_PENDING_CHANNEL_INFO, self.__on_cp_bonus_pending)
-        self.callback.register(WSSEventName.CP_BALANCE_CHANGE_CHANNEL_INFO, self.__on_cp_balance_change)
-        self.callback.register(WSSEventName.RAID_STATUS_CHANNEL_INFO, self.__on_raid_status_channel_info)
-        self.callback.register(WSSEventName.STREAM_SLOT_START_CHANNEL_INFO, self.__on_stream_slot_start_channel_info)
-        self.callback.register(WSSEventName.STREAM_SLOT_END_CHANNEL_INFO, self.__on_stream_slot_end_channel_info)
+        self.callback.register(WebSocketEventName.DROP_CAMPAIGN_PROGRESS_CHANNEL_INFO, self.__on_drop_campaign_progress)
+        self.callback.register(WebSocketEventName.CP_BONUS_PENDING_CHANNEL_INFO, self.__on_cp_bonus_pending)
+        self.callback.register(WebSocketEventName.CP_BALANCE_CHANGE_CHANNEL_INFO, self.__on_cp_balance_change)
+        self.callback.register(WebSocketEventName.RAID_STATUS_CHANNEL_INFO, self.__on_raid_status_channel_info)
+        self.callback.register(WebSocketEventName.STREAM_SLOT_START_CHANNEL_INFO, self.__on_stream_slot_start_channel_info)
+        self.callback.register(WebSocketEventName.STREAM_SLOT_END_CHANNEL_INFO, self.__on_stream_slot_end_channel_info)
 
     def __on_streamer_stream_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo):
         self.__inc_metric_streamers()
@@ -320,7 +320,7 @@ class WatchStreamMonitor:
             if bonus.id:
                 self.streamer_pending_bonus_gather(_streamer_nickname, bonus.id)
 
-    # WSSEventClass, WSSEventName
+    # WebSocketEventClass, WebSocketEventName
     def __on_drop_campaign_progress(self: TVKVideoApi, streamer_id: int, user_id: int,
                                     message: WssDropCampaignProgressChannelInfo):
         if str(user_id) != str(self.user_id):

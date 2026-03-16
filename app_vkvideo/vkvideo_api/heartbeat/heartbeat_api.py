@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 
 from loguru import logger
 
-from .wss_class import *
+from ..web_socket.web_socket_model import *
 from ..api.api_class import *
 from ..config import USER_HEARTBEAT_VIEWER_URL, BASE_URL
 
@@ -178,9 +178,9 @@ class HeartbeatApi:
         self.__callback.register(VKAPIEventName.STREAMER_INFO, self.__on_streamer_info)
         self.__callback.register(VKAPIEventName.STREAMER_STREAM_INFO, self.__on_streamer_stream_info)
 
-        self.__callback.register(WSSEventName.CHANNEL_STREAM_CHANNEL_INFO, self.__channel_stream_channel_info)
-        self.__callback.register(WSSEventName.STREAM_SLOT_START_CHANNEL_INFO, self.__on_stream_slot_start_channel_info)
-        self.__callback.register(WSSEventName.STREAM_SLOT_END_CHANNEL_INFO, self.__on_stream_slot_end_channel_info)
+        self.__callback.register(WebSocketEventName.CHANNEL_STREAM_CHANNEL_INFO, self.__channel_stream_channel_info)
+        self.__callback.register(WebSocketEventName.STREAM_SLOT_START_CHANNEL_INFO, self.__on_stream_slot_start_channel_info)
+        self.__callback.register(WebSocketEventName.STREAM_SLOT_END_CHANNEL_INFO, self.__on_stream_slot_end_channel_info)
 
     def __on_streamer_info(self, streamer_id: int, user_id: int, message: VkapiStreamerInfo):
         streamer_nickname = message.blog_url

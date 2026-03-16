@@ -40,10 +40,15 @@ from .stream_start_channel_info import WssStreamStartChannelInfo
 from .stream_start_stream_slot import WssStreamStartStreamSlot
 
 
-class WSSEventName(Enum):
-    ON_MESSAGE = "on_message"
-    ON_CONNECTED = "on_connected"
-    ON_DISCONNECTED = "on_disconnected"
+class WebSocketEventName(Enum):
+    WEB_SOCKET_ON_OPEN = "web_socket_on_open"
+    WEB_SOCKET_ON_CLOSE = "web_socket_on_close"
+    WEB_SOCKET_ON_DATA = "web_socket_on_data"
+    WEB_SOCKET_ON_MESSAGE = "web_socket_on_message"
+    WEB_SOCKET_ON_SEND_MESSAGE = "web_socket_on_send_message"
+    WEB_SOCKET_ON_ERROR = "web_socket_on_error"
+    WEB_SOCKET_ON_AUTHENTICATED = "web_socket_on_authenticated"
+
     CHANNEL_STATE_CHANNEL_INFO = "channel_state_channel_info"
     CHANNEL_STREAM_CHANNEL_INFO = "channel_stream_channel_info"
     CHANNEL_STREAM_STREAM_SLOT = "channel_stream_stream_slot"
@@ -84,48 +89,48 @@ class WSSEventName(Enum):
     STREAM_START_STREAM_SLOT = "stream_start_stream_slot"
 
 
-WSSEventClass = {
-    WSSEventName.CHANNEL_STATE_CHANNEL_INFO: WssChannelStateChannelInfo,
-    WSSEventName.CHANNEL_STREAM_CHANNEL_INFO: WssChannelStreamChannelInfo,
-    WSSEventName.CHANNEL_STREAM_STREAM_SLOT: WssChannelStreamStreamSlot,
-    WSSEventName.CHAT_BAN_CHANNEL_CHAT: WssChatBanChannelChat,
-    WSSEventName.CHAT_PINNED_MESSAGE_REACTION_CHANNEL_CHAT: WssChatPinnedMessageReactionChannelChat,
-    WSSEventName.CHAT_PINNED_MESSAGE_REACTION_V_CHANNEL_CHAT: WssChatPinnedMessageReactionVChannelChat,
-    WSSEventName.CLEAN_CHAT_MESSAGES_CHANNEL_CHAT: WssCleanChatMessagesChannelChat,
-    WSSEventName.CP_BALANCE_CHANGE_CHANNEL_INFO: WssCpBalanceChangeChannelInfo,
-    WSSEventName.CP_BONUS_PENDING_CHANNEL_INFO: WssCpBonusPendingChannelInfo,
-    WSSEventName.DELETE_MESSAGE_CHANNEL_CHAT: WssDeleteMessageChannelChat,
-    WSSEventName.DROP_CAMPAIGN_PROGRESS_CHANNEL_INFO: WssDropCampaignProgressChannelInfo,
-    WSSEventName.DROP_PROGRESS_CHANNEL_INFO: WssDropProgressChannelInfo,
-    WSSEventName.MESSAGE_CHANNEL_CHAT: WssMessageChannelChat,
-    WSSEventName.PREDICTION_CHANNEL_INFO: WssPredictionChannelInfo,
-    WSSEventName.RAID_STATUS_CHANNEL_INFO: WssRaidStatusChannelInfo,
-    WSSEventName.RAID_STATUS_STREAM_SLOT: WssRaidStatusStreamSlot,
-    WSSEventName.STREAM_END_CHANNEL_INFO: WssStreamEndChannelInfo,
-    WSSEventName.STREAM_END_STREAM_SLOT: WssStreamEndStreamSlot,
-    WSSEventName.STREAM_INFO_UPDATE_CHANNEL_INFO: WssStreamInfoUpdateChannelInfo,
-    WSSEventName.STREAM_INFO_UPDATE_STREAM_SLOT: WssStreamInfoUpdateStreamSlot,
-    WSSEventName.STREAM_LIKE_COUNTER_CHANNEL_INFO: WssStreamLikeCounterChannelInfo,
-    WSSEventName.STREAM_LIKE_COUNTER_STREAM_SLOT: WssStreamLikeCounterStreamSlot,
-    WSSEventName.STREAM_ONLINE_STATUS_CHANNEL_INFO: WssStreamOnlineStatusChannelInfo,
-    WSSEventName.STREAM_ONLINE_STATUS_STREAM_SLOT: WssStreamOnlineStatusStreamSlot,
-    WSSEventName.STREAM_SLOT_END_CHANNEL_INFO: WssStreamSlotEndChannelInfo,
-    WSSEventName.STREAM_SLOT_END_STREAM_SLOT: WssStreamSlotEndStreamSlot,
-    WSSEventName.STREAM_SLOT_INFO_CHANNEL_INFO: WssStreamSlotInfoChannelInfo,
-    WSSEventName.STREAM_SLOT_INFO_UPDATE_CHANNEL_INFO: WssStreamSlotInfoUpdateChannelInfo,
-    WSSEventName.STREAM_SLOT_INFO_UPDATE_STREAM_SLOT: WssStreamSlotInfoUpdateStreamSlot,
-    WSSEventName.STREAM_SLOT_LIKE_COUNTER_CHANNEL_INFO: WssStreamSlotLikeCounterChannelInfo,
-    WSSEventName.STREAM_SLOT_LIKE_COUNTER_STREAM_SLOT: WssStreamSlotLikeCounterStreamSlot,
-    WSSEventName.STREAM_SLOT_ONLINE_STATUS_CHANNEL_INFO: WssStreamSlotOnlineStatusChannelInfo,
-    WSSEventName.STREAM_SLOT_ONLINE_STATUS_STREAM_SLOT: WssStreamSlotOnlineStatusStreamSlot,
-    WSSEventName.STREAM_SLOT_START_CHANNEL_INFO: WssStreamSlotStartChannelInfo,
-    WSSEventName.STREAM_SLOT_START_STREAM_SLOT: WssStreamSlotStartStreamSlot,
-    WSSEventName.STREAM_START_CHANNEL_INFO: WssStreamStartChannelInfo,
-    WSSEventName.STREAM_START_STREAM_SLOT: WssStreamStartStreamSlot,
+WebSocketEventClass = {
+    WebSocketEventName.CHANNEL_STATE_CHANNEL_INFO: WssChannelStateChannelInfo,
+    WebSocketEventName.CHANNEL_STREAM_CHANNEL_INFO: WssChannelStreamChannelInfo,
+    WebSocketEventName.CHANNEL_STREAM_STREAM_SLOT: WssChannelStreamStreamSlot,
+    WebSocketEventName.CHAT_BAN_CHANNEL_CHAT: WssChatBanChannelChat,
+    WebSocketEventName.CHAT_PINNED_MESSAGE_REACTION_CHANNEL_CHAT: WssChatPinnedMessageReactionChannelChat,
+    WebSocketEventName.CHAT_PINNED_MESSAGE_REACTION_V_CHANNEL_CHAT: WssChatPinnedMessageReactionVChannelChat,
+    WebSocketEventName.CLEAN_CHAT_MESSAGES_CHANNEL_CHAT: WssCleanChatMessagesChannelChat,
+    WebSocketEventName.CP_BALANCE_CHANGE_CHANNEL_INFO: WssCpBalanceChangeChannelInfo,
+    WebSocketEventName.CP_BONUS_PENDING_CHANNEL_INFO: WssCpBonusPendingChannelInfo,
+    WebSocketEventName.DELETE_MESSAGE_CHANNEL_CHAT: WssDeleteMessageChannelChat,
+    WebSocketEventName.DROP_CAMPAIGN_PROGRESS_CHANNEL_INFO: WssDropCampaignProgressChannelInfo,
+    WebSocketEventName.DROP_PROGRESS_CHANNEL_INFO: WssDropProgressChannelInfo,
+    WebSocketEventName.MESSAGE_CHANNEL_CHAT: WssMessageChannelChat,
+    WebSocketEventName.PREDICTION_CHANNEL_INFO: WssPredictionChannelInfo,
+    WebSocketEventName.RAID_STATUS_CHANNEL_INFO: WssRaidStatusChannelInfo,
+    WebSocketEventName.RAID_STATUS_STREAM_SLOT: WssRaidStatusStreamSlot,
+    WebSocketEventName.STREAM_END_CHANNEL_INFO: WssStreamEndChannelInfo,
+    WebSocketEventName.STREAM_END_STREAM_SLOT: WssStreamEndStreamSlot,
+    WebSocketEventName.STREAM_INFO_UPDATE_CHANNEL_INFO: WssStreamInfoUpdateChannelInfo,
+    WebSocketEventName.STREAM_INFO_UPDATE_STREAM_SLOT: WssStreamInfoUpdateStreamSlot,
+    WebSocketEventName.STREAM_LIKE_COUNTER_CHANNEL_INFO: WssStreamLikeCounterChannelInfo,
+    WebSocketEventName.STREAM_LIKE_COUNTER_STREAM_SLOT: WssStreamLikeCounterStreamSlot,
+    WebSocketEventName.STREAM_ONLINE_STATUS_CHANNEL_INFO: WssStreamOnlineStatusChannelInfo,
+    WebSocketEventName.STREAM_ONLINE_STATUS_STREAM_SLOT: WssStreamOnlineStatusStreamSlot,
+    WebSocketEventName.STREAM_SLOT_END_CHANNEL_INFO: WssStreamSlotEndChannelInfo,
+    WebSocketEventName.STREAM_SLOT_END_STREAM_SLOT: WssStreamSlotEndStreamSlot,
+    WebSocketEventName.STREAM_SLOT_INFO_CHANNEL_INFO: WssStreamSlotInfoChannelInfo,
+    WebSocketEventName.STREAM_SLOT_INFO_UPDATE_CHANNEL_INFO: WssStreamSlotInfoUpdateChannelInfo,
+    WebSocketEventName.STREAM_SLOT_INFO_UPDATE_STREAM_SLOT: WssStreamSlotInfoUpdateStreamSlot,
+    WebSocketEventName.STREAM_SLOT_LIKE_COUNTER_CHANNEL_INFO: WssStreamSlotLikeCounterChannelInfo,
+    WebSocketEventName.STREAM_SLOT_LIKE_COUNTER_STREAM_SLOT: WssStreamSlotLikeCounterStreamSlot,
+    WebSocketEventName.STREAM_SLOT_ONLINE_STATUS_CHANNEL_INFO: WssStreamSlotOnlineStatusChannelInfo,
+    WebSocketEventName.STREAM_SLOT_ONLINE_STATUS_STREAM_SLOT: WssStreamSlotOnlineStatusStreamSlot,
+    WebSocketEventName.STREAM_SLOT_START_CHANNEL_INFO: WssStreamSlotStartChannelInfo,
+    WebSocketEventName.STREAM_SLOT_START_STREAM_SLOT: WssStreamSlotStartStreamSlot,
+    WebSocketEventName.STREAM_START_CHANNEL_INFO: WssStreamStartChannelInfo,
+    WebSocketEventName.STREAM_START_STREAM_SLOT: WssStreamStartStreamSlot,
 }
 
 __all__ = [
-    "WSSEventName", "WSSEventClass",
+    "WebSocketEventName", "WebSocketEventClass",
     "WssChannelStateChannelInfo",
     "WssChannelStreamChannelInfo",
     "WssChannelStreamStreamSlot",

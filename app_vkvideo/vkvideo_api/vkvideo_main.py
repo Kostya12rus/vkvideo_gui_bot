@@ -5,7 +5,8 @@ from typing import Any
 from app_vkvideo.monitoring import MetricsManager
 from .api import UserApi, StreamerApi, StreamersApi, WatchStreamMonitor
 from .auth import AuthModule
-from .heartbeat import WebSocketClientApi, HeartbeatApi
+from .heartbeat import HeartbeatApi
+from .web_socket import WebSocketManager
 
 
 class VKVideoApi(UserApi, StreamerApi, StreamersApi, WatchStreamMonitor):
@@ -23,6 +24,8 @@ class VKVideoApi(UserApi, StreamerApi, StreamersApi, WatchStreamMonitor):
 
     def __init__(self, user_id: int, cookies: list[dict[str, Any]]):
         super().__init__(user_id, cookies)
+        if user_id <= 0:
+            return
         if hasattr(self, '_initialized'):
             self.cookies = cookies
             return
@@ -30,7 +33,10 @@ class VKVideoApi(UserApi, StreamerApi, StreamersApi, WatchStreamMonitor):
         self._initialized = True
         self.__is_running = False
 
-        self.wss_api = WebSocketClientApi(self)
+        web_socket_api = WebSocketManager.get_or_create_web_socket_manager(self)
+        if web_socket_api is None:
+            raise RuntimeError(f"Failed to initialize WebSocketManager for user_id={self.user_id}")
+        self.web_socket_api: WebSocketManager = web_socket_api
         self.heartbeat_streamers: dict[str, HeartbeatApi] = {}
 
         self.is_watch_online_subscribers = False

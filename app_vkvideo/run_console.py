@@ -85,7 +85,9 @@ def run():
 
     new_user.metrics_manager = create_metrics(new_user.user_id, args)
 
-    new_user.wss_api.is_debug = args.is_debug
+    web_socket_api = getattr(new_user, "web_socket_api", None)
+    if web_socket_api is not None:
+        web_socket_api.is_debug = args.is_debug
     logger.info("Запускаю просмотр стримеров на которые подписан аккаунт и сейчас стримят")
     new_user.start_watch_online_subscribers()
     if not args.disable_farm_drop_company:
