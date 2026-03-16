@@ -192,7 +192,6 @@ class WebSocketManager:
             self._update_web_socket_state_metrics_locked()
         self.vk_api.inc_metric("vkapp_wss_unsubscriptions_total")
 
-
     def update_web_socket_channels(
             self,
             streamer_nickname: str,

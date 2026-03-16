@@ -10,10 +10,9 @@ from curl_cffi.curl import CurlError
 from loguru import logger
 from select import select
 
-from app_vkvideo.models import Account
+from app_vkvideo.utils import CallbackManager
 from app_vkvideo.vkvideo_api.auth import AuthModule
 from app_vkvideo.vkvideo_api.config import WSS_URL, BASE_URL
-from app_vkvideo.utils import CallbackManager
 from .web_socket_model import WebSocketEventName
 
 if TYPE_CHECKING:
@@ -29,7 +28,7 @@ class CurlWsFrame:
 
 
 class WebSocketClient:
-    def __init__(self,  vk_api: "VKVideoApi"):
+    def __init__(self, vk_api: "VKVideoApi"):
         self.vk_api = vk_api
         self.web_socket = WebSocket()
 
@@ -107,7 +106,6 @@ class WebSocketClient:
         self.__callback.trigger(WebSocketEventName.WEB_SOCKET_ON_AUTHENTICATED, self, status)
         self.__is_authenticated = status
 
-
     def __send_any(self, message: str | bytes | list | dict) -> bool:
         status = False
         try:
@@ -136,7 +134,6 @@ class WebSocketClient:
     def get_request_id(self):
         self.__web_socket_request_id += 1
         return self.__web_socket_request_id
-
 
     def run(self, force_restart: bool = False):
         thread_to_join: Optional[threading.Thread] = None
@@ -185,7 +182,6 @@ class WebSocketClient:
                 self._thread_run_forever = None
             elif self._thread_run_forever and not self._thread_run_forever.is_alive():
                 self._thread_run_forever = None
-
 
     def _loop_run_restart(self):
         self._thread_stop_event.clear()
@@ -266,7 +262,6 @@ class WebSocketClient:
                         self.__on_close(code=self.web_socket._close_code or 0,
                                         reason=self.web_socket._close_reason or "")
                     raise
-
 
     def _selenium_get_web_socket_token(self):
         self.__web_socket_token = AuthModule().get_web_socket_token_from_selenium(self.vk_api.cookies)

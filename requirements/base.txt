@@ -3,6 +3,6 @@ peewee==4.0.1
 psutil==7.2.2
 loguru==0.7.3
 curl-cffi==0.14.0
-seleniumbase==4.47.1
+seleniumbase==4.47.3
 cryptography==46.0.5
 prometheus-client==0.24.1
