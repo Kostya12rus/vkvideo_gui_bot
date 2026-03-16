@@ -146,12 +146,19 @@ class WebSocketManager:
         if not streamer_nickname:
             return
 
+        should_inc_subscriptions_total = False
         with self._lock:
             streamer = self._get_or_create_streamer(streamer_nickname)
+            was_enabled = streamer.is_enabled
+            had_assignment = streamer.assigned_client_id is not None
+
             streamer.is_enabled = True
             streamer.update_info(streamer_id=streamer_id, channels=set(web_socket_channels or []))
             bucket = self._ensure_bucket_for_streamer(streamer)
             self._update_web_socket_state_metrics_locked()
+
+            if (not was_enabled) or (not had_assignment and bucket is not None):
+                should_inc_subscriptions_total = True
 
         if not self._is_run:
             self.is_run = True
@@ -159,17 +166,27 @@ class WebSocketManager:
         if bucket:
             bucket.client.run()
             self._sync_streamer_subscription(streamer.streamer_nickname)
-        self.vk_api.inc_metric("vkapp_wss_subscriptions_total")
+
+        if should_inc_subscriptions_total:
+            self.vk_api.inc_metric("vkapp_wss_subscriptions_total")
 
     def unsubscribe_streamer(self, streamer_nickname: str) -> None:
         if not streamer_nickname:
             return
 
         clear_nickname = Streamer.normalize_nickname(streamer_nickname)
+        should_inc_unsubscriptions_total = False
         with self._lock:
             streamer = self._streamers.get(clear_nickname)
             if not streamer:
                 return
+
+            was_effectively_subscribed = (
+                streamer.is_enabled
+                or streamer.assigned_client_id is not None
+                or bool(streamer.subscribed_channels)
+            )
+
             streamer.is_enabled = False
             assigned_bucket_id = streamer.assigned_client_id
 
@@ -190,7 +207,11 @@ class WebSocketManager:
             if not self._streamers_with_assignment_locked():
                 self._is_run = False
             self._update_web_socket_state_metrics_locked()
-        self.vk_api.inc_metric("vkapp_wss_unsubscriptions_total")
+
+            should_inc_unsubscriptions_total = was_effectively_subscribed
+
+        if should_inc_unsubscriptions_total:
+            self.vk_api.inc_metric("vkapp_wss_unsubscriptions_total")
 
     def update_web_socket_channels(
             self,
