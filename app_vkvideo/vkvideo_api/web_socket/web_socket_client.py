@@ -201,6 +201,8 @@ class WebSocketClient:
     def _run_forever(self):
         self._api_fetch_web_socket_token()
 
+        self.web_socket = WebSocket()
+
         self.web_socket.connect(
             url=WSS_URL,
             impersonate=random.choice([i.value for i in curl_cffi.BrowserType]),
