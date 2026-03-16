@@ -30,6 +30,11 @@ def parse_args() -> argparse.Namespace:
         help="Интервал фонового сбора ресурсных метрик в секундах (по умолчанию: 5.0)",
     )
     parser.add_argument(
+        "--hostname",
+        default="",
+        help="",
+    )
+    parser.add_argument(
         "--is-debug",
         action="store_true",
         help="Включить дебаг режим WebSocket",
@@ -48,11 +53,12 @@ def parse_args() -> argparse.Namespace:
 
 
 def create_metrics(user_id: int | str, args: argparse.Namespace) -> Any:
+    hostname = args.hostname if args.hostname else socket.gethostname()
     return MetricsManager(
         host=args.metrics_host,
         port=args.metrics_port,
         user_id=str(user_id),
-        hostname=socket.gethostname(),
+        hostname=hostname,
         collect_interval=args.metrics_interval,
         autostart=True,
     )

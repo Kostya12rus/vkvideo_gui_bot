@@ -188,6 +188,7 @@ storage/
 /monitoring/
 script_testing/
 grafana/
+server_docker/
 
 # Prompts
 changes.txt
