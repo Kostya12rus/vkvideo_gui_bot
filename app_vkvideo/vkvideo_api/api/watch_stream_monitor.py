@@ -11,7 +11,7 @@ from ..heartbeat import HeartbeatApi
 from ..web_socket.web_socket_model import *
 
 if TYPE_CHECKING:
-    from ..vkvideo_main import VKVideoApi  # noqa
+    from ..vkvideo_main import VKVideoApi
 
 TVKVideoApi = TypeVar("TVKVideoApi", bound="VKVideoApi")
 
@@ -196,7 +196,10 @@ class WatchStreamMonitor:
                 new_list = {
                     (s.blog.blog_url, s.blog.owner.id)
                     for s in streamers.data.stream_blogs if
-                    str(s.blog.blog_url) != str(s.blog.owner.id)
+                    str(s.blog.blog_url) != str(s.blog.owner.id) and
+                    s.stream.is_online and
+                    s.stream.has_access and
+                    s.stream.count.viewers >= MIN_VIEWERS_FOR_WATCH_IN_CATALOG
                 }
 
                 add_list = set(new_list) - set(now_list)
@@ -231,15 +234,17 @@ class WatchStreamMonitor:
             threading.Thread(target=self.stop_watch_streamer, args=(streamer_nickname,)).start()
         self.catalog_streamers = []
 
-    def get_streamer_data(self: TVKVideoApi, streamer_nickname: str = "", streamer_id: int = None) -> tuple[
-        Optional[str], Optional[int]]:
+    def get_streamer_data(
+            self: TVKVideoApi, streamer_nickname: str = "", streamer_id: int = None
+    ) -> tuple[ Optional[str], Optional[int]]:
         heartbeat_class = self.get_heartbeat_class(streamer_nickname=streamer_nickname, streamer_id=streamer_id)
         if heartbeat_class:
             return heartbeat_class.streamer_nickname.lower(), heartbeat_class.streamer_id
         return None, None
 
-    def get_heartbeat_class(self: TVKVideoApi, streamer_nickname: str = "", streamer_id: int = None) -> Optional[
-        HeartbeatApi]:
+    def get_heartbeat_class(
+            self: TVKVideoApi, streamer_nickname: str = "", streamer_id: int = None
+    ) -> Optional[HeartbeatApi]:
         if not streamer_nickname and not streamer_id:
             return None
 
@@ -276,7 +281,9 @@ class WatchStreamMonitor:
         self.callback.register(WebSocketEventName.STREAM_SLOT_START_CHANNEL_INFO, self.__on_stream_slot_start_channel_info)
         self.callback.register(WebSocketEventName.STREAM_SLOT_END_CHANNEL_INFO, self.__on_stream_slot_end_channel_info)
 
-    def __on_streamer_stream_info(self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo):
+    def __on_streamer_stream_info(
+            self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo
+    ):
         self.__inc_metric_streamers()
         if str(user_id) != str(self.user_id):
             return
@@ -309,8 +316,9 @@ class WatchStreamMonitor:
                 target=self.streamer_set_like, args=(_streamer_nickname, message.data.stream.id), daemon=True
             ).start()
 
-    def __on_streamer_pending_bonus(self: TVKVideoApi, streamer_id: int, user_id: int,
-                                    message: VkapiStreamerPendingBonus):
+    def __on_streamer_pending_bonus(
+            self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerPendingBonus
+    ):
         if str(user_id) != str(self.user_id):
             return
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
@@ -320,9 +328,9 @@ class WatchStreamMonitor:
             if bonus.id:
                 self.streamer_pending_bonus_gather(_streamer_nickname, bonus.id)
 
-    # WebSocketEventClass, WebSocketEventName
-    def __on_drop_campaign_progress(self: TVKVideoApi, streamer_id: int, user_id: int,
-                                    message: WssDropCampaignProgressChannelInfo):
+    def __on_drop_campaign_progress(
+            self: TVKVideoApi, streamer_id: int, user_id: int, message: WssDropCampaignProgressChannelInfo
+    ):
         if str(user_id) != str(self.user_id):
             return
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
@@ -363,7 +371,9 @@ class WatchStreamMonitor:
             if current == goal:
                 self.drop_campaign_products_request(_streamer_nickname, drop.campaign.id)
 
-    def __on_cp_bonus_pending(self: TVKVideoApi, streamer_id: int, user_id: int, message: WssCpBonusPendingChannelInfo):
+    def __on_cp_bonus_pending(
+            self: TVKVideoApi, streamer_id: int, user_id: int, message: WssCpBonusPendingChannelInfo
+    ):
         if str(user_id) != str(self.user_id):
             return
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
@@ -372,8 +382,9 @@ class WatchStreamMonitor:
         if bonus.id:
             self.streamer_pending_bonus_gather(_streamer_nickname, bonus.id)
 
-    def __on_cp_balance_change(self: TVKVideoApi, streamer_id: int, user_id: int,
-                               message: WssCpBalanceChangeChannelInfo):
+    def __on_cp_balance_change(
+            self: TVKVideoApi, streamer_id: int, user_id: int, message: WssCpBalanceChangeChannelInfo
+    ):
         if str(user_id) != str(self.user_id):
             return
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
@@ -389,8 +400,9 @@ class WatchStreamMonitor:
         self.inc_metric("vkapp_get_point_type", point_type=str(data.reason.bonus.type))
         self.set_gauge("vkapp_has_point_total", float(data.balance), streamer_nickname=_streamer_nickname)
 
-    def __on_raid_status_channel_info(self: TVKVideoApi, streamer_id: int, user_id: int,
-                                      message: WssRaidStatusChannelInfo):
+    def __on_raid_status_channel_info(
+            self: TVKVideoApi, streamer_id: int, user_id: int, message: WssRaidStatusChannelInfo
+    ):
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
 
         data = message.push.pub.data.data
@@ -406,8 +418,9 @@ class WatchStreamMonitor:
                 f"Участвую в рейде, статус: {status}, статус просмотра: {status_v}"
             )
 
-    def __on_stream_slot_start_channel_info(self: TVKVideoApi, streamer_id: int, user_id: int,
-                                            message: WssStreamSlotStartChannelInfo):
+    def __on_stream_slot_start_channel_info(
+            self: TVKVideoApi, streamer_id: int, user_id: int, message: WssStreamSlotStartChannelInfo
+    ):
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
 
         data = message.push.pub.data.data
@@ -419,8 +432,9 @@ class WatchStreamMonitor:
         time.sleep(random.randint(0, 2) + random.random())
         self.get_streamer_stream_info(_streamer_nickname)
 
-    def __on_stream_slot_end_channel_info(self: TVKVideoApi, streamer_id: int, user_id: int,
-                                          message: WssStreamSlotEndChannelInfo):
+    def __on_stream_slot_end_channel_info(
+            self: TVKVideoApi, streamer_id: int, user_id: int, message: WssStreamSlotEndChannelInfo
+    ):
         _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
 
         logger.info(
