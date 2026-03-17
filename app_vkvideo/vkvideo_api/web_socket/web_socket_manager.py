@@ -26,7 +26,7 @@ class Streamer:
         self.web_socket_channels: set[str] = set()
         self.subscribed_channels: set[str] = set()
         self.assigned_client_id: Optional[int] = None
-        self.is_enabled: bool = True
+        self.is_enabled: bool = False
 
     @staticmethod
     def normalize_nickname(streamer_nickname: str) -> str:
