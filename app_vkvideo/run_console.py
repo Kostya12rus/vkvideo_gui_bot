@@ -70,7 +70,7 @@ def run():
     init_db()
     accounts = Account.get_all()
     if not accounts:
-        logger.info("У вас нет сохраненных аккаунтов. Авторизуемся?")
+        logger.info("У вас нет сохраненных аккаунтов. Пожалуйста авторизуйтесь, открываю браузер...")
         new_user = VKVideoApi.start_auth()
 
         user_info = new_user.actor_info()
