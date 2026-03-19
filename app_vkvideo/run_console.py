@@ -66,7 +66,6 @@ def create_metrics(user_id: int | str, args: argparse.Namespace) -> Any:
 
 def run():
     args = parse_args()
-    logger.info("Запущена консольная версия от 19.03.2026 22:11")
 
     init_db()
     accounts = Account.get_all()

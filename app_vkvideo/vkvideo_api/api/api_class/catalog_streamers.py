@@ -1,4 +1,14 @@
 # region ------ AUTO GENERATED CLASS "VkapiCatalogStreamers" from JSON by Kostya12rus ------
+# region ------ AUTO GENERATED VkapiCatalogStreamersExtra ------
+class VkapiCatalogStreamersExtra:
+    def __init__(self, data_json: dict = None):
+        if not data_json: data_json = {}
+        self._data_json = data_json
+
+        self.is_last: bool = data_json.get("isLast", False)
+        self.offset: int = data_json.get("offset", 0)
+# endregion ------ AUTO GENERATED VkapiCatalogStreamersExtra ------
+
 # region ------ AUTO GENERATED VkapiCatalogStreamersDataCategoryCount ------
 class VkapiCatalogStreamersDataCategoryCount:
     def __init__(self, data_json: dict = None):
@@ -23,6 +33,65 @@ class VkapiCatalogStreamersDataCategory:
         self.type: str = data_json.get("type", "")
 # endregion ------ AUTO GENERATED VkapiCatalogStreamersDataCategory ------
 
+# region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsBlogOwnerStreameractivity ------
+class VkapiCatalogStreamersDataStreamblogsBlogOwnerStreameractivity:
+    def __init__(self, data_json: dict = None):
+        if not data_json: data_json = {}
+        self._data_json = data_json
+
+        self.level: int = data_json.get("level", 0)
+# endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsBlogOwnerStreameractivity ------
+
+# region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsBlogOwner ------
+class VkapiCatalogStreamersDataStreamblogsBlogOwner:
+    def __init__(self, data_json: dict = None):
+        if not data_json: data_json = {}
+        self._data_json = data_json
+
+        self.avatar_url: str = data_json.get("avatarUrl", "")
+        self.display_name: str = data_json.get("displayName", "")
+        self.has_avatar: bool = data_json.get("hasAvatar", False)
+        self.id: int = data_json.get("id", 0)
+        self.is_verified_streamer: bool = data_json.get("isVerifiedStreamer", False)
+        self.name: str = data_json.get("name", "")
+        self.nick: str = data_json.get("nick", "")
+        self.nick_color: int = data_json.get("nickColor", 0)
+        self.profile_links: list = data_json.get("profileLinks", [])
+        self.streamer_activity: VkapiCatalogStreamersDataStreamblogsBlogOwnerStreameractivity = VkapiCatalogStreamersDataStreamblogsBlogOwnerStreameractivity(data_json.get("streamerActivity", None))
+        self.vkplay_profile_link: str = data_json.get("vkplayProfileLink", "")
+# endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsBlogOwner ------
+
+# region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsBlog ------
+class VkapiCatalogStreamersDataStreamblogsBlog:
+    def __init__(self, data_json: dict = None):
+        if not data_json: data_json = {}
+        self._data_json = data_json
+
+        self.blog_url: str = data_json.get("blogUrl", "")
+        self.cover_url: str = data_json.get("coverUrl", "")
+        self.has_adult_content: bool = data_json.get("hasAdultContent", False)
+        self.owner: VkapiCatalogStreamersDataStreamblogsBlogOwner = VkapiCatalogStreamersDataStreamblogsBlogOwner(data_json.get("owner", None))
+        self.title: str = data_json.get("title", "")
+# endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsBlog ------
+
+# region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictionsView ------
+class VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictionsView:
+    def __init__(self, data_json: dict = None):
+        if not data_json: data_json = {}
+        self._data_json = data_json
+
+        self.allowed: bool = data_json.get("allowed", False)
+# endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictionsView ------
+
+# region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictions ------
+class VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictions:
+    def __init__(self, data_json: dict = None):
+        if not data_json: data_json = {}
+        self._data_json = data_json
+
+        self.view: VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictionsView = VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictionsView(data_json.get("view", None))
+# endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictions ------
+
 # region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamCategory ------
 class VkapiCatalogStreamersDataStreamblogsStreamCategory:
     def __init__(self, data_json: dict = None):
@@ -34,6 +103,26 @@ class VkapiCatalogStreamersDataStreamblogsStreamCategory:
         self.title: str = data_json.get("title", "")
         self.type: str = data_json.get("type", "")
 # endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamCategory ------
+
+# region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamStreamslot ------
+class VkapiCatalogStreamersDataStreamblogsStreamStreamslot:
+    def __init__(self, data_json: dict = None):
+        if not data_json: data_json = {}
+        self._data_json = data_json
+
+        self.cover_image_changed_at: int = data_json.get("coverImageChangedAt", 0)
+        self.cover_image_url: str = data_json.get("coverImageUrl", "")
+        self.created_at: int = data_json.get("createdAt", 0)
+        self.id: int = data_json.get("id", 0)
+        self.is_chat_disabled: bool = data_json.get("isChatDisabled", False)
+        self.is_deleted: bool = data_json.get("isDeleted", False)
+        self.is_online: bool = data_json.get("isOnline", False)
+        self.is_temporary: bool = data_json.get("isTemporary", False)
+        self.is_vk_wallpost_create: bool = data_json.get("isVkWallpostCreate", False)
+        self.self_public_streams_hidden: bool = data_json.get("selfPublicStreamsHidden", False)
+        self.slot_url: str = data_json.get("slotUrl", "")
+        self.updated_at: int = data_json.get("updatedAt", 0)
+# endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamStreamslot ------
 
 # region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamCountSources ------
 class VkapiCatalogStreamersDataStreamblogsStreamCountSources:
@@ -57,24 +146,6 @@ class VkapiCatalogStreamersDataStreamblogsStreamCount:
         self.viewers: int = data_json.get("viewers", 0)
         self.views: int = data_json.get("views", 0)
 # endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamCount ------
-
-# region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictionsView ------
-class VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictionsView:
-    def __init__(self, data_json: dict = None):
-        if not data_json: data_json = {}
-        self._data_json = data_json
-
-        self.allowed: bool = data_json.get("allowed", False)
-# endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictionsView ------
-
-# region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictions ------
-class VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictions:
-    def __init__(self, data_json: dict = None):
-        if not data_json: data_json = {}
-        self._data_json = data_json
-
-        self.view: VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictionsView = VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictionsView(data_json.get("view", None))
-# endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamAccessrestrictions ------
 
 # region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStreamTitledata ------
 class VkapiCatalogStreamersDataStreamblogsStreamTitledata:
@@ -122,6 +193,7 @@ class VkapiCatalogStreamersDataStreamblogsStream:
         self.planned_end_at: None = data_json.get("plannedEndAt", None)
         self.preview_url: str = data_json.get("previewUrl", "")
         self.start_time: int = data_json.get("startTime", 0)
+        self.stream_slot: VkapiCatalogStreamersDataStreamblogsStreamStreamslot = VkapiCatalogStreamersDataStreamblogsStreamStreamslot(data_json.get("streamSlot", None))
         self.title: str = data_json.get("title", "")
         self.title_data: list[VkapiCatalogStreamersDataStreamblogsStreamTitledata] = [VkapiCatalogStreamersDataStreamblogsStreamTitledata(item) for item in data_json.get("titleData", [])]
         self.ws_chat_channel: str = data_json.get("wsChatChannel", "")
@@ -136,47 +208,6 @@ class VkapiCatalogStreamersDataStreamblogsStream:
         self.ws_stream_slot_private: str = data_json.get("wsStreamSlotPrivate", "")
         self.ws_stream_viewers_channel: str = data_json.get("wsStreamViewersChannel", "")
 # endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsStream ------
-
-# region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsBlogOwnerStreameractivity ------
-class VkapiCatalogStreamersDataStreamblogsBlogOwnerStreameractivity:
-    def __init__(self, data_json: dict = None):
-        if not data_json: data_json = {}
-        self._data_json = data_json
-
-        self.level: int = data_json.get("level", 0)
-# endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsBlogOwnerStreameractivity ------
-
-# region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsBlogOwner ------
-class VkapiCatalogStreamersDataStreamblogsBlogOwner:
-    def __init__(self, data_json: dict = None):
-        if not data_json: data_json = {}
-        self._data_json = data_json
-
-        self.avatar_url: str = data_json.get("avatarUrl", "")
-        self.display_name: str = data_json.get("displayName", "")
-        self.has_avatar: bool = data_json.get("hasAvatar", False)
-        self.id: int = data_json.get("id", 0)
-        self.is_verified_streamer: bool = data_json.get("isVerifiedStreamer", False)
-        self.name: str = data_json.get("name", "")
-        self.nick: str = data_json.get("nick", "")
-        self.nick_color: int = data_json.get("nickColor", 0)
-        self.profile_links: list = data_json.get("profileLinks", [])
-        self.streamer_activity: VkapiCatalogStreamersDataStreamblogsBlogOwnerStreameractivity = VkapiCatalogStreamersDataStreamblogsBlogOwnerStreameractivity(data_json.get("streamerActivity", None))
-        self.vkplay_profile_link: str = data_json.get("vkplayProfileLink", "")
-# endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsBlogOwner ------
-
-# region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsBlog ------
-class VkapiCatalogStreamersDataStreamblogsBlog:
-    def __init__(self, data_json: dict = None):
-        if not data_json: data_json = {}
-        self._data_json = data_json
-
-        self.blog_url: str = data_json.get("blogUrl", "")
-        self.cover_url: str = data_json.get("coverUrl", "")
-        self.has_adult_content: bool = data_json.get("hasAdultContent", False)
-        self.owner: VkapiCatalogStreamersDataStreamblogsBlogOwner = VkapiCatalogStreamersDataStreamblogsBlogOwner(data_json.get("owner", None))
-        self.title: str = data_json.get("title", "")
-# endregion ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogsBlog ------
 
 # region ------ AUTO GENERATED VkapiCatalogStreamersDataStreamblogs ------
 class VkapiCatalogStreamersDataStreamblogs:
@@ -197,16 +228,6 @@ class VkapiCatalogStreamersData:
         self.category: VkapiCatalogStreamersDataCategory = VkapiCatalogStreamersDataCategory(data_json.get("category", None))
         self.stream_blogs: list[VkapiCatalogStreamersDataStreamblogs] = [VkapiCatalogStreamersDataStreamblogs(item) for item in data_json.get("streamBlogs", [])]
 # endregion ------ AUTO GENERATED VkapiCatalogStreamersData ------
-
-# region ------ AUTO GENERATED VkapiCatalogStreamersExtra ------
-class VkapiCatalogStreamersExtra:
-    def __init__(self, data_json: dict = None):
-        if not data_json: data_json = {}
-        self._data_json = data_json
-
-        self.is_last: bool = data_json.get("isLast", False)
-        self.offset: int = data_json.get("offset", 0)
-# endregion ------ AUTO GENERATED VkapiCatalogStreamersExtra ------
 
 # region ------ AUTO GENERATED VkapiCatalogStreamers ------
 class VkapiCatalogStreamers:

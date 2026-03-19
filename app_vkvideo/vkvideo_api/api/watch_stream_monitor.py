@@ -199,6 +199,7 @@ class WatchStreamMonitor:
                     str(s.blog.blog_url) != str(s.blog.owner.id) and
                     s.stream.is_online and
                     s.stream.has_access and
+                    not s.stream.stream_slot.slot_url and
                     s.stream.count.viewers >= MIN_VIEWERS_FOR_WATCH_IN_CATALOG
                 }
 
