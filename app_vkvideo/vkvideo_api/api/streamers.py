@@ -74,6 +74,8 @@ class StreamersApi(BaseApi):
             return return_data
 
     def get_catalog_streamers(self, catalog_id: str, limit: int = 20, offset: int = 0, load_all: bool = False) -> VkapiCatalogStreamers:
+        if not catalog_id:
+            return VkapiCatalogStreamers()
         if not load_all:
             req = self.request(STREAMERS_CATALOG_URL.format(catalog_id, limit, offset), "GET")
             req_json = req.json()

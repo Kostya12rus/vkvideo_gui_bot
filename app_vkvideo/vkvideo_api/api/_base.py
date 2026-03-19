@@ -6,7 +6,6 @@ from io import BytesIO
 from typing import Any, Unpack, Optional, Union, TypedDict, TYPE_CHECKING, TypeVar
 from urllib.parse import urlparse
 
-from curl_cffi.requests.exceptions import Timeout
 from loguru import logger
 
 import curl_cffi

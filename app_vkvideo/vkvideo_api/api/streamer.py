@@ -13,6 +13,8 @@ class StreamerApi(BaseApi):
 
 
     def get_streamer_info(self, streamer_nickname: str) -> VkapiStreamerInfo:
+        if not streamer_nickname:
+            return VkapiStreamerInfo()
         req = self.request(
             STREAMER_INFO_URL.format(streamer_nickname),
             "GET",
@@ -27,6 +29,8 @@ class StreamerApi(BaseApi):
         return req_class
 
     def get_streamer_stream_info(self, streamer_nickname: str) -> VkapiStreamerStreamInfo:
+        if not streamer_nickname:
+            return VkapiStreamerStreamInfo()
         req = self.request(
             STREAMER_STREAM_INFO_URL.format(streamer_nickname),
             "GET",
@@ -42,6 +46,8 @@ class StreamerApi(BaseApi):
 
 
     def streamer_raid(self, streamer_nickname: str) -> dict:
+        if not streamer_nickname:
+            return {}
         req = self.request(
             STREAMER_RAID_URL.format(streamer_nickname),
             "GET",
@@ -51,6 +57,8 @@ class StreamerApi(BaseApi):
         return req_json
 
     def streamer_raid_user_state(self, streamer_nickname: str) -> dict:
+        if not streamer_nickname:
+            return {}
         req = self.request(
             STREAMER_RAID_USER_STATE_URL.format(streamer_nickname),
             "GET",
@@ -60,6 +68,8 @@ class StreamerApi(BaseApi):
         return req_json
 
     def streamer_raid_viewer(self, streamer_nickname: str, raid_to_streamer_nickname: str) -> dict:
+        if not streamer_nickname or not raid_to_streamer_nickname:
+            return {}
         headers = self.__get_streamer_referer(streamer_nickname)
         headers["Content-Type"] = "application/x-www-form-urlencoded"
         headers["referer"] = BASE_URL + f"{raid_to_streamer_nickname}?raid_from={streamer_nickname}"
@@ -73,6 +83,8 @@ class StreamerApi(BaseApi):
 
 
     def streamer_follow(self, streamer_nickname: str) -> bool:
+        if not streamer_nickname:
+            return False
         req = self.request(
             STREAMER_FOLLOW_URL.format(streamer_nickname),
             "POST",
@@ -82,6 +94,8 @@ class StreamerApi(BaseApi):
         return req_json["status"]
 
     def streamer_unfollow(self, streamer_nickname: str) -> bool:
+        if not streamer_nickname:
+            return False
         req = self.request(
             STREAMER_UNFOLLOW_URL.format(streamer_nickname),
             "POST",
@@ -92,6 +106,8 @@ class StreamerApi(BaseApi):
 
 
     def streamer_set_like(self, streamer_nickname: str, stream_id: str) -> bool:
+        if not streamer_nickname or not stream_id:
+            return False
         send_json = {
             "contentId": f"{stream_id}",
             "contentType": "stream",
@@ -106,6 +122,8 @@ class StreamerApi(BaseApi):
         return req.ok
 
     def streamer_del_like(self, streamer_nickname: str, stream_id: str) -> bool:
+        if not streamer_nickname or not stream_id:
+            return False
         send_json = {
             "contentId": f"{stream_id}",
             "contentType": "stream",
@@ -120,6 +138,8 @@ class StreamerApi(BaseApi):
 
 
     def get_streamer_pending_bonus(self, streamer_nickname: str) -> VkapiStreamerPendingBonus:
+        if not streamer_nickname:
+            return VkapiStreamerPendingBonus()
         req = self.request(
             STREAMER_PENDING_BONUS_URL.format(streamer_nickname),
             "GET",
@@ -135,6 +155,8 @@ class StreamerApi(BaseApi):
         return req_class
 
     def streamer_pending_bonus_gather(self, streamer_nickname: str, bonus_id: str) -> bool:
+        if not streamer_nickname or not bonus_id:
+            return False
         headers = self.__get_streamer_referer(streamer_nickname)
         headers["content-type"] = "application/x-www-form-urlencoded"
         req = self.request(
@@ -145,6 +167,8 @@ class StreamerApi(BaseApi):
         return req.ok
 
     def drop_campaign_products_request(self, streamer_nickname: str,  campaign_id: int | str) -> dict:
+        if not streamer_nickname or not campaign_id:
+            return {}
         headers = self.__get_streamer_referer(streamer_nickname)
         headers["content-type"] = "application/x-www-form-urlencoded"
         req = self.request(
@@ -158,6 +182,8 @@ class StreamerApi(BaseApi):
 
     def get_streamer_chat(self, streamer_nickname: str, limit: int | str = 50) -> dict:
         """ Получает последние сообщения в чате стримера в количестве limit """
+        if not streamer_nickname or not limit:
+            return {}
         req = self.request(
             STREAMER_CHAT_URL.format(streamer_nickname, limit),
             "GET",

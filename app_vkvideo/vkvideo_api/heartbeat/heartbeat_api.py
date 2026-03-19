@@ -53,9 +53,18 @@ class HeartbeatApi:
             self.__thread_stop_event.set()
 
     def __infinity_pool_watch_stream(self) -> None:
+        try_fetch_streamer_info = 0
         while self.__is_run:
             if not self._last_streamer_info or not self._last_streamer_stream_info:
-                threading.Thread(target=self.__init_streamer_info, daemon=True).start()
+                try_fetch_streamer_info += 1
+                if try_fetch_streamer_info > 10:
+                    logger.info(
+                        f"[{self.streamer_nickname}] Не удалось получить информацию о стримере за 10 попыток. "
+                        f"Отключаю..."
+                    )
+                    break
+                self.__init_streamer_info()
+                # threading.Thread(target=self.__init_streamer_info, daemon=True).start()
 
             if not self.streamer_is_online or not self.streamer_stream_id:
                 if self.__thread_stop_event.wait(random.randint(5, 10) + random.random()):
