@@ -1,5 +1,6 @@
 from ._base_model import db
 from .account import Account
+from .settings import Setting
 
 
 def init_db() -> None:
@@ -8,12 +9,13 @@ def init_db() -> None:
     db.create_tables(
         [
             Account,
+            Setting
         ]
     )
 
 
 __all__ = [
-    "Account",
+    "Account", "Setting",
     "db",
     "init_db"
 ]

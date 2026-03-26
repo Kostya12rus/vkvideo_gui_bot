@@ -45,6 +45,8 @@ STREAMER_POINT_REWARD_URL = "v1/channel/{}/point/reward/" #c1ymba
 STREAMER_PENDING_BONUS_URL = "v1/channel/{}/point/pending_bonus/" #c1ymba
 STREAMER_PENDING_BONUS_GATHER_URL = "v1/channel/{}/point/pending_bonus/{}/gather" #c1ymba, f65f6f87-4e29-4a84-8ce8-55cc054a3055
 
+STREAMER_GET_SUBSCRIPTION_LEVEL_URL = "/v1/blog/{}/subscription_level/?show_free_level=true" #c1ymba
+
 STREAMERS_ONLINE_SUBSCRIPTIONS_URL = "v1/%2Fuser%2Fpublic_video_stream%2Fsubscriptions%2Fonline%2F?limit={}&offset={}" #limit=50&offset=0
 STREAMERS_SUBSCRIPTIONS_URL = "v1/user/subscriptions?limit={}&offset={}&with_follow=true" #limit=30&offset=0
 STREAMERS_DROP_URL = "v1/catalog/public_video_streams/drops/?limit={}&offset={}" #limit=40&offset=0

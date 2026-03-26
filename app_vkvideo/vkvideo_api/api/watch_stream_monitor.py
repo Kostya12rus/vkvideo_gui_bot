@@ -274,6 +274,7 @@ class WatchStreamMonitor:
         self.__init_callback = True
         self.callback.register(VKAPIEventName.STREAMER_PENDING_BONUS, self.__on_streamer_pending_bonus)
         self.callback.register(VKAPIEventName.STREAMER_STREAM_INFO, self.__on_streamer_stream_info)
+        self.callback.register(VKAPIEventName.STREAMER_SUBSCRIPTION_LEVEL, self.__on_streamer_subscription_level)
 
         self.callback.register(WebSocketEventName.DROP_CAMPAIGN_PROGRESS_CHANNEL_INFO, self.__on_drop_campaign_progress)
         self.callback.register(WebSocketEventName.CP_BONUS_PENDING_CHANNEL_INFO, self.__on_cp_bonus_pending)
@@ -317,6 +318,14 @@ class WatchStreamMonitor:
                 target=self.streamer_set_like, args=(_streamer_nickname, message.data.stream.id), daemon=True
             ).start()
 
+        logger.debug(
+            f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
+            f"Загружаю текущие виды подписок на стримера"
+        )
+        threading.Thread(
+            target=self.get_streamer_subscription_level, args=(_streamer_nickname, ), daemon=True
+        ).start()
+
     def __on_streamer_pending_bonus(
             self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerPendingBonus
     ):
@@ -328,6 +337,69 @@ class WatchStreamMonitor:
         for bonus in bonuses:
             if bonus.id:
                 self.streamer_pending_bonus_gather(_streamer_nickname, bonus.id)
+
+    def __on_streamer_subscription_level(
+            self: TVKVideoApi, streamer_id: int, user_id: int, message: VkapiStreamerSubscriptionLevel
+    ):
+        if str(user_id) != str(self.user_id):
+            return
+        _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_id=streamer_id)
+        metric_name = "vkapp_streamers_subscription_level"
+        if not hasattr(self, "_subscription_level_metric_labels_by_streamer"):
+            self._subscription_level_metric_labels_by_streamer = {}
+
+        previous_labels = self._subscription_level_metric_labels_by_streamer.get(_streamer_nickname)
+        current_subscription = next(
+            (subscription for subscription in message.subscriptions if subscription.level_id == message.current_id),
+            None,
+        )
+
+        if not current_subscription:
+            if previous_labels:
+                self.set_gauge(metric_name, 0.0, **previous_labels)
+                self._subscription_level_metric_labels_by_streamer.pop(_streamer_nickname, None)
+            return
+
+        subscription_data = next(
+            (
+                data
+                for data in message.data
+                if current_subscription.level_id == data.external_id or current_subscription.level_id == data.id
+            ),
+            None
+        )
+        if not subscription_data:
+            return
+        if subscription_data.price == 0:
+            return
+
+        name = subscription_data.name
+        price = subscription_data.price
+        off_time = current_subscription.off_time
+        bonus_multiplier = subscription_data.bonus_multiplier if subscription_data.bonus_multiplier > 1 else 1
+
+        current_labels = {
+            "name": str(name),
+            "price": str(price),
+            "streamer_nickname": str(_streamer_nickname),
+            "bonus_multiplier": str(bonus_multiplier),
+        }
+
+        if previous_labels and previous_labels != current_labels:
+            self.set_gauge(metric_name, 0.0, **previous_labels)
+
+        if off_time <= 0:
+            self.set_gauge(metric_name, 0.0, **current_labels)
+            self._subscription_level_metric_labels_by_streamer[_streamer_nickname] = current_labels
+            return
+
+        self.set_gauge(metric_name, float(off_time), **current_labels)
+        self._subscription_level_metric_labels_by_streamer[_streamer_nickname] = current_labels
+        logger.info(
+            f"{user_id}: '{_streamer_nickname}'[{_streamer_id}] "
+            f"У стримера имеем активную подписку '{name}' ({price}руб), XP: x{bonus_multiplier}"
+        )
+
 
     def __on_drop_campaign_progress(
             self: TVKVideoApi, streamer_id: int, user_id: int, message: WssDropCampaignProgressChannelInfo

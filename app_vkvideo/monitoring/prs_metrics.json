@@ -106,6 +106,12 @@
       "additional_labels": [],
       "groups": ["start_with_zero"]
     },
+    "vkapp_streamers_subscription_level": {
+      "type": "gauge",
+      "documentation": "Current active streamer subscription off_time unix timestamp",
+      "additional_labels": ["streamer_nickname", "name", "price", "bonus_multiplier"],
+      "groups": []
+    },
 
     "vkapp_has_point_total": {
       "type": "gauge",

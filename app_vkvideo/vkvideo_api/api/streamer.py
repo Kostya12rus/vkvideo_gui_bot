@@ -180,6 +180,24 @@ class StreamerApi(BaseApi):
         return req_json
 
 
+    def get_streamer_subscription_level(self, streamer_nickname: str) -> VkapiStreamerSubscriptionLevel:
+        if not streamer_nickname:
+            return VkapiStreamerSubscriptionLevel()
+        req = self.request(
+            STREAMER_GET_SUBSCRIPTION_LEVEL_URL.format(streamer_nickname),
+            "GET",
+            headers=self.__get_streamer_referer(streamer_nickname)
+        )
+        _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_nickname=streamer_nickname)
+        req_json = req.json()
+        req_class = VkapiStreamerSubscriptionLevel(req_json)
+        self.callback.trigger(
+            VKAPIEventName.STREAMER_SUBSCRIPTION_LEVEL, streamer_id=_streamer_id,
+            user_id=self.user_id, message=req_class
+        )
+        return req_class
+
+
     def get_streamer_chat(self, streamer_nickname: str, limit: int | str = 50) -> dict:
         """ Получает последние сообщения в чате стримера в количестве limit """
         if not streamer_nickname or not limit:
