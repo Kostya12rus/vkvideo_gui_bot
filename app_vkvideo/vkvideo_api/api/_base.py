@@ -55,9 +55,15 @@ class BaseApi:
         self.session = self._create_session()
 
     def _create_session(self: TVKVideoApi) -> curl_cffi.Session:
-        session = curl_cffi.Session()
-        session.default_headers = True
-        session.impersonate = random.choice([imp.value for imp in curl_cffi.BrowserType])
+        session = curl_cffi.Session(
+            default_headers=True,
+            verify=True,
+            http_version=curl_cffi.CurlHttpVersion.V1_1,
+            impersonate=random.choice([
+                "chrome120", "chrome123", "chrome124",
+                "chrome131", "chrome133a", "chrome136", "chrome142",
+            ])
+        )
 
         for cookie in self.cookies:
             session.cookies.set(
@@ -66,7 +72,11 @@ class BaseApi:
             )
 
         access_token = next(
-            (json.loads(cookie['value'])["accessToken"] for cookie in self.cookies if "auth" == cookie['name']),
+            (
+                json.loads(cookie['value'])["accessToken"]
+                for cookie in self.cookies
+                if "auth" == cookie['name']
+            ),
             None
         )
         session.headers.update({'Authorization': f'Bearer {access_token}'})
@@ -98,7 +108,8 @@ class BaseApi:
         with self.__request_semaphore:
             req: Optional[curl_cffi.Response] = None
             with curl_cffi.Session(**default_kwargs) as session:
-                for _ in range(MAX_RETRIES):
+                for try_number, _ in enumerate(range(MAX_RETRIES), start=1):
+                    try_text = f"{try_number}/{MAX_RETRIES}"
                     req = None
                     try:
                         time_min, time_max = min(HTTP_REQUESTS_TIME_SLEEP), max(HTTP_REQUESTS_TIME_SLEEP)
@@ -107,7 +118,10 @@ class BaseApi:
                         req = session.request(method=method, url=full_url, timeout=MAX_TIMEOUT_IN_SECONDS, **kwargs)
                         break
                     except Exception as e:
-                        logger.error(f"[{e.__class__.__name__}] Источник не прислал ответ на запрос: {method}, {full_url}")
+                        logger.error(
+                            f"[{e.__class__.__name__}] Источник ответил на запрос {try_text}: "
+                            f"{method}, '{full_url}'"
+                        )
                         self.inc_metric("vkapp_requests_with_error", code=e.__class__.__name__.lower())
                         continue
                     finally:
@@ -117,9 +131,9 @@ class BaseApi:
                                 self.inc_metric("vkapp_requests_success")
                             else:
                                 self.inc_metric("vkapp_requests_with_error", code=str(req.status_code))
-                                logger.error(f"{method}, {req.status_code}, {req.elapsed}, {full_url}")
+                                logger.error(f"{try_text}, {method}, {req.status_code}, {req.elapsed}, '{full_url}'")
                         else:
-                            logger.error(f"{method}, {full_url}")
+                            logger.error(f"{try_text}, {method}, '{full_url}'")
 
                 if req is None:
                     raise RuntimeError(f"Request failed after retries: {method} {full_url}")

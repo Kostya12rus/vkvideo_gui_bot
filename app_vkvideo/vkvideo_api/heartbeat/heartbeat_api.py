@@ -118,14 +118,18 @@ class HeartbeatApi:
                 USER_HEARTBEAT_VIEWER_URL.format(self.streamer_nickname, self.streamer_stream_id) + send_type,
                 "PUT",
                 headers={
-                    "Accept": "application/json, text/plain, */*",
+                    "accept": "application/json, text/plain, */*",
                     "accept-encoding": "gzip, deflate, br, zstd",
                     "accept-language": "ru,en;q=0.9",
-                    "Content-Type": "application/x-www-form-urlencoded",
+                    "content-type": "application/x-www-form-urlencoded",
                     "origin": BASE_URL,
                     "referer": f"{BASE_URL}/{self.streamer_nickname}",
                     "x-app": "streams_web",
-                    "x-from-id": str(uuid.uuid4()),
+                    "x-from-id": self.vk_api.session.cookies.get('_clientId', domain='.live.vkvideo.ru'),
+                    "x-trans-path": str(uuid.uuid4()),
+                    "x-trans-source": "",
+                    "x-trans-target": "blog_url_channel_tab",
+                    "x-trans-via": "",
                 }
             )
 
