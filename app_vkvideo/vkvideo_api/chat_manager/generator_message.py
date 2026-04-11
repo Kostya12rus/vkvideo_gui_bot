@@ -4,7 +4,11 @@ import re
 import time
 from typing import TYPE_CHECKING
 
-from ..config import CHAT_MIN_MESSAGE_TO_ANALIZE, CHAT_MAX_TIME_OLD
+from ..config import (
+    CHAT_MIN_MESSAGE_TO_ANALIZE,
+    CHAT_MAX_TIME_OLD,
+    CHAT_MIN_AUTHORS_MESSAGE
+)
 
 if TYPE_CHECKING:
     from ..api.api_class import VkapiStreamerChat
@@ -104,6 +108,10 @@ class MessageGenerator:
     def _generate_text_messages(self) -> str:
         active_messages = self._active_message_list()
         if not active_messages:
+            return ""
+
+        count_author_messages = len({str(message.author.id) for message in active_messages})
+        if count_author_messages < CHAT_MIN_AUTHORS_MESSAGE:
             return ""
 
         text_messages = []

@@ -14,6 +14,7 @@ CHAT_INTERVAL_SEND = 30 * 60        # интервал запроса новых
 CHAT_LIMIT_MESSAGE = 100            # кол-во запрашиваемых сообщений
 CHAT_MIN_MESSAGE_TO_ANALIZE = 15    # минимальное кол-во сообщений для анализа
 CHAT_MAX_TIME_OLD = 30 * 60         # максимальный возраст сообщения для анализа
+CHAT_MIN_AUTHORS_MESSAGE = 10       # Количество разных авторов сообщений
 
 BASE_URL = "https://live.vkvideo.ru/"
 API_URL = "https://api.live.vkvideo.ru/"
