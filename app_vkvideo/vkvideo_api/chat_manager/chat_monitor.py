@@ -99,7 +99,8 @@ class ChatMonitor:
         prompt_generator = MessageGenerator(class_message=message)
         active_message = prompt_generator._active_message_list()
         logger.debug(
-            f"[{self.streamer_nickname}] Начинаю создавать сообщения для чата: {len(active_message)} сообщений")
+            f"[{self.streamer_nickname}] Начинаю создавать сообщения для чата: {len(active_message)} сообщений"
+        )
         system_prompt = prompt_generator.get_system_message()
         question_prompt = prompt_generator.get_question()
         if not question_prompt or not system_prompt:
@@ -124,16 +125,16 @@ class ChatMonitor:
         else:
             self.vk_api.metrics_manager.inc_metric("vkapp_gpt_requests_success")
 
-        validate_text = MessageGenerator.validate_and_convert_response(response)
-        if not validate_text:
+        validate_list = MessageGenerator.validate_and_convert_response(response)
+        if not validate_list:
             logger.debug(
                 f"[{self.streamer_nickname}] ответ полученный от DeepSeek невалидный, {response}"
             )
             return
 
         self.vk_api.metrics_manager.inc_metric("vkapp_gpt_requests_message_current")
-        logger.debug(f"[{self.streamer_nickname}] предложенное сообщение от DeepSeek\n{response}")
-        self.vk_api.send_message_chat(self.streamer_nickname, validate_text)
+        logger.debug(f"[{self.streamer_nickname}] предложенное сообщение от DeepSeek: '{response}'")
+        self.vk_api.send_message_chat(self.streamer_nickname, validate_list)
 
     def __on_streamer_stream_info(
             self, streamer_id: int, user_id: int, message: VkapiStreamerStreamInfo

@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from ._base import BaseApi
@@ -217,7 +218,7 @@ class StreamerApi(BaseApi):
         )
         return req_class
 
-    def send_message_chat(self, streamer_nickname: str, message: str) -> dict:
+    def send_message_chat(self, streamer_nickname: str, message: list) -> dict:
         if not streamer_nickname or not message:
             return {}
         headers = self.__get_streamer_referer(streamer_nickname)
@@ -237,7 +238,7 @@ class StreamerApi(BaseApi):
             STREAMER_CHAT_SEND_MESSAGE_URL.format(streamer_nickname),
             "POST",
             headers=headers,
-            data=message,
+            data={"data": json.dumps(message, ensure_ascii=False)},
         )
         req_json = req.json()
         return req_json
