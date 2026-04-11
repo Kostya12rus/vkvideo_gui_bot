@@ -7,3 +7,5 @@ class Config:
     DATA_PATH = MAIN_PATH / "data"
     DATABASE_PATH = DATA_PATH / "database.sqlite3"
     DEBUG = True
+    DEEPSEEK_BASE_URL = "https://api.deepseek.com"
+    DEEPSEEK_MODEL = "deepseek-reasoner"

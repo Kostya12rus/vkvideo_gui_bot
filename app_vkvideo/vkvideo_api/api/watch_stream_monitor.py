@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, TypeVar, Optional
 from loguru import logger
 
 from .api_class import *
+from ..chat_manager import ChatMonitor
 from ..config import *
 from ..heartbeat import HeartbeatApi
 from ..web_socket.web_socket_model import *
@@ -29,6 +30,9 @@ class WatchStreamMonitor:
         self.heartbeat_streamers[streamer_nickname].is_run = True
         self.inc_metric("vkapp_streamers_heartbeat_subscription_total")
 
+        self.chat_manager_streamers[streamer_nickname] = ChatMonitor(vk_api=self, streamer_nickname=streamer_nickname)
+        self.chat_manager_streamers[streamer_nickname].is_run = True
+
     def stop_watch_streamer(self: TVKVideoApi, streamer_nickname: str) -> None:
         self._initialize_callback()
         if streamer_nickname not in self.heartbeat_streamers:
@@ -39,6 +43,10 @@ class WatchStreamMonitor:
         self.heartbeat_streamers[streamer_nickname].is_run = False
         del self.heartbeat_streamers[streamer_nickname]
         self.inc_metric("vkapp_streamers_heartbeat_unsubscriptions_total")
+
+        if streamer_nickname in self.chat_manager_streamers:
+            self.chat_manager_streamers[streamer_nickname].is_run = False
+            del self.chat_manager_streamers[streamer_nickname]
 
     def start_watch_all_subscribers(self: TVKVideoApi) -> None:
         if self.is_watch_all_subscribers:
@@ -237,7 +245,7 @@ class WatchStreamMonitor:
 
     def get_streamer_data(
             self: TVKVideoApi, streamer_nickname: str = "", streamer_id: int = None
-    ) -> tuple[ Optional[str], Optional[int]]:
+    ) -> tuple[Optional[str], Optional[int]]:
         heartbeat_class = self.get_heartbeat_class(streamer_nickname=streamer_nickname, streamer_id=streamer_id)
         if heartbeat_class:
             return heartbeat_class.streamer_nickname.lower(), heartbeat_class.streamer_id
@@ -350,7 +358,11 @@ class WatchStreamMonitor:
 
         previous_labels = self._subscription_level_metric_labels_by_streamer.get(_streamer_nickname)
         current_subscription = next(
-            (subscription for subscription in message.subscriptions if subscription.level_id == message.current_id),
+            (
+                subscription
+                for subscription in message.subscriptions
+                if subscription.level_id == message.current_id
+            ),
             None,
         )
 

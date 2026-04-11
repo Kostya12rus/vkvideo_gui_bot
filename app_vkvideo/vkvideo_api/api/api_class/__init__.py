@@ -8,6 +8,7 @@ from .streamer_pending_bonus import VkapiStreamerPendingBonus
 from .streamer_stream_info import VkapiStreamerStreamInfo
 from .streamer_subscription_level import VkapiStreamerSubscriptionLevel
 from .subscription_streamers import VkapiSubscriptionStreamers
+from .streamer_chat import VkapiStreamerChat
 
 
 class VKAPIEventName(Enum):
@@ -19,6 +20,7 @@ class VKAPIEventName(Enum):
     STREAMER_STREAM_INFO = "streamer_stream_info"
     STREAMER_PENDING_BONUS = "streamer_pending_bonus"
     STREAMER_SUBSCRIPTION_LEVEL = "streamer_subscription_level"
+    STREAMER_CHAT = "streamer_chat"
 
 
 VKAPIEventClass = {
@@ -30,6 +32,7 @@ VKAPIEventClass = {
     VKAPIEventName.STREAMER_STREAM_INFO: VkapiStreamerStreamInfo,
     VKAPIEventName.STREAMER_PENDING_BONUS: VkapiStreamerPendingBonus,
     VKAPIEventName.STREAMER_SUBSCRIPTION_LEVEL: VkapiStreamerSubscriptionLevel,
+    VKAPIEventName.STREAMER_CHAT: VkapiStreamerChat,
 }
 
 __all__ = [
@@ -42,4 +45,5 @@ __all__ = [
     "VkapiStreamerStreamInfo",
     "VkapiStreamerPendingBonus",
     "VkapiStreamerSubscriptionLevel",
+    "VkapiStreamerChat",
 ]

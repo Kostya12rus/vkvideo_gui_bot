@@ -5,6 +5,7 @@ from typing import Any
 from app_vkvideo.monitoring import MetricsManager
 from .api import UserApi, StreamerApi, StreamersApi, WatchStreamMonitor
 from .auth import AuthModule
+from .chat_manager import ChatMonitor
 from .heartbeat import HeartbeatApi
 from .web_socket import WebSocketManager
 
@@ -38,6 +39,7 @@ class VKVideoApi(UserApi, StreamerApi, StreamersApi, WatchStreamMonitor):
             raise RuntimeError(f"Failed to initialize WebSocketManager for user_id={self.user_id}")
         self.web_socket_api: WebSocketManager = web_socket_api
         self.heartbeat_streamers: dict[str, HeartbeatApi] = {}
+        self.chat_manager_streamers: dict[str, ChatMonitor] = {}
 
         self.is_watch_online_subscribers = False
         self.is_watch_all_subscribers = False

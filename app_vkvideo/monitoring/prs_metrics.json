@@ -27,6 +27,31 @@
       "groups": ["start_with_zero"]
     },
 
+    "vkapp_gpt_requests_all": {
+      "type": "counter",
+      "documentation": "Total number of application GPT requests",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_gpt_requests_success": {
+      "type": "counter",
+      "documentation": "Total number of successful GPT requests",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_gpt_requests_error": {
+      "type": "counter",
+      "documentation": "Total number of failed GPT requests",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+    "vkapp_gpt_requests_message_current": {
+      "type": "counter",
+      "documentation": "Ответ-сообщение от DeepSeek корректен",
+      "additional_labels": [],
+      "groups": ["start_with_zero"]
+    },
+
     "vkapp_wss_active": {
       "type": "gauge",
       "documentation": "WebSocket connection status (1 active, 0 inactive)",

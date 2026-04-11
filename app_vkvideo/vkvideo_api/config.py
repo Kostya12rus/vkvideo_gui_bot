@@ -9,6 +9,11 @@ UPDATE_CATALOG_LIST_INTERVAL = 300
 
 MIN_VIEWERS_FOR_WATCH_IN_CATALOG = 10
 
+CHAT_START_PAUSE = [ 30, 90 ]       # периуд паузы перед запросом списка сообщений
+CHAT_INTERVAL_SEND = 30 * 60        # интервал запроса новых сообщений
+CHAT_LIMIT_MESSAGE = 100            # кол-во запрашиваемых сообщений
+CHAT_MIN_MESSAGE_TO_ANALIZE = 15    # минимальное кол-во сообщений для анализа
+CHAT_MAX_TIME_OLD = 30 * 60         # максимальный возраст сообщения для анализа
 
 BASE_URL = "https://live.vkvideo.ru/"
 API_URL = "https://api.live.vkvideo.ru/"
@@ -27,6 +32,7 @@ DROP_CAMPAING_PRODUCTS_REQUEST_URL = "v1/drop_campaign/{}/products_request" #620
 
 STREAMER_INFO_URL = "v1/blog/{}" #c1ymba
 STREAMER_CHAT_URL = "v1/channel/{}/stream/slot/default/chat?limit={}" #c1ymba, limit=20
+STREAMER_CHAT_SEND_MESSAGE_URL = "v1/channel/{}/stream/slot/default/chat" #c1ymba
 STREAMER_FOLLOW_URL = "v1/blog/{}/follow" #c1ymba
 STREAMER_UNFOLLOW_URL = "v1/blog/{}/unsubscribe" #c1ymba
 STREAMER_LIKE_URL = "v8/reaction" #c1ymba

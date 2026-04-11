@@ -49,6 +49,11 @@ def parse_args() -> argparse.Namespace:
         default="",
         help='Просмотр стримеров в указанной категории (по умолчанию: "")',
     )
+    parser.add_argument(
+        "--deepseek-api-key",
+        default="",
+        help="API ключ DeepSeek для LLM-функций (по умолчанию: пусто)",
+    )
     return parser.parse_args()
 
 

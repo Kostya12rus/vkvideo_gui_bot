@@ -1,3 +1,5 @@
+import uuid
+
 from ._base import BaseApi
 from .api_class import *
 from ..config import *
@@ -198,14 +200,45 @@ class StreamerApi(BaseApi):
         return req_class
 
 
-    def get_streamer_chat(self, streamer_nickname: str, limit: int | str = 50) -> dict:
+    def get_streamer_chat(self, streamer_nickname: str, limit: int | str = 20) -> VkapiStreamerChat:
         """ Получает последние сообщения в чате стримера в количестве limit """
         if not streamer_nickname or not limit:
-            return {}
+            return VkapiStreamerChat()
         req = self.request(
             STREAMER_CHAT_URL.format(streamer_nickname, limit),
             "GET",
             headers=self.__get_streamer_referer(streamer_nickname)
         )
+        _streamer_nickname, _streamer_id = self.get_streamer_data(streamer_nickname=streamer_nickname)
+        req_json = req.json()
+        req_class = VkapiStreamerChat(req_json)
+        self.callback.trigger(
+            VKAPIEventName.STREAMER_CHAT, streamer_id=_streamer_id, user_id=self.user_id, message=req_class
+        )
+        return req_class
+
+    def send_message_chat(self, streamer_nickname: str, message: str) -> dict:
+        if not streamer_nickname or not message:
+            return {}
+        headers = self.__get_streamer_referer(streamer_nickname)
+        headers.update({
+            "accept": "application/json, text/plain, */*",
+            "content-type": "application/x-www-form-urlencoded",
+            "x-app": "streams_web",
+            "x-from-id": self.session.cookies.get('_clientId', domain='.live.vkvideo.ru'),
+            "x-referer": "",
+            "x-super-referer": "",
+            "x-trans-path": str(uuid.uuid4()),
+            "x-trans-source": "blog_url_channel_tab",
+            "x-trans-target": "blog_url_channel_tab",
+            "x-trans-via": "",
+        })
+        req = self.request(
+            STREAMER_CHAT_SEND_MESSAGE_URL.format(streamer_nickname),
+            "POST",
+            headers=headers,
+            data=message,
+        )
         req_json = req.json()
         return req_json
+
