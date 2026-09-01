@@ -75,7 +75,7 @@ class BaseApi:
             (
                 json.loads(cookie['value'])["accessToken"]
                 for cookie in self.cookies
-                if "auth" == cookie['name']
+                if cookie['name'] == "auth" and cookie['domain'] == '.live.vkvideo.ru'
             ),
             None
         )
